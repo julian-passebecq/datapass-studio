@@ -39,7 +39,7 @@ export interface StudioAppManifest {
   format:'datapass.studio.app'; schemaVersion:1; id:string; title:string; version:string; description:string;
   classification:'synthetic'|'private';
   parameters:{id:string;label:string;default:number;min:number;max:number;step:number;unit:string;group:string;affects:string[];note:string}[];
-  views:{id:string;label:string;kind:'lab'|'plans'|'compare'|'references'|'explain'|'custom';icon:string;description:string}[];
+  views:{id:string;label:string;kind:'lab'|'plans'|'compare'|'references'|'data'|'explain'|'custom';icon:string;description:string}[];
   tasks:{id:string;label:string;input_nodes:string[];output_nodes:string[];revision_guarded:boolean;cancellable:boolean}[];
   artifacts:{id:string;title:string;kind:'figure'|'document-region'|'image'|'code'|'table';entity_ids:string[];document_id:string|null;page:number|null;phase:number|null;source_kind:'synthetic'|'private-reference'|'user-reference'|'derived'}[];
 }
