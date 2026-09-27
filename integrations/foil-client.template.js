@@ -7,6 +7,11 @@ import {data} from './data.js';
 import {canonical} from '../../packages/runtime/validation.js';
 const G=globalThis.FoilGeometry;if(!G)throw new Error('Private geometry adapter missing');
 const defaultId=data.defaultId,parameters=data.parameters;
+const artifactCatalog={documents:[{id:'foil-r0-dossier',title:'Dossier R0 prive',mime:'text/markdown',sourceKind:'private-reference',sourceLabel:'Reference locale verifiee par le connecteur; aucun PDF n\'est invente'}],artifacts:[
+ {id:'foil-a-reference',title:'Foil A · geometrie de reference',kind:'figure',documentId:'foil-r0-dossier',entityIds:['foil_A','arm_A'],phase:.19,preview:{plane:'side'},sourceKind:'private-reference',summary:'Liaison vers la geometrie R0 locale. La tessellation de reference reste distincte de tout apercu parametrique modifie.'},
+ {id:'foil-head-reference',title:'Tete et pivot',kind:'document-region',documentId:'foil-r0-dossier',entityIds:['head_frame','head_bearing'],phase:.50,preview:{plane:'front'},sourceKind:'private-reference',summary:'Repere documentaire prive; ce connecteur ne pretend pas disposer d\'un PDF pagine.'},
+ {id:'foil-mast-reference',title:'Mat et implantation',kind:'figure',documentId:'foil-r0-dossier',entityIds:['mast','base_interface'],preview:{plane:'top'},sourceKind:'private-reference',summary:'Exemple de binding source/model sans copier la source scientifique dans Studio.'}
+]};
 const valueCache=new WeakMap();
 function body(p,id=defaultId){let map=valueCache.get(p);if(!map){map=new Map();valueCache.set(p,map);}if(map.has(id))return map.get(id);
  const b=structuredClone(data.cases[id]);if(!b)throw new Error('Unknown private scenario');
@@ -24,7 +29,7 @@ function mesh(c){if(meshCache.has(c))return meshCache.get(c);const reference=dat
  const value={parts,source:isReference?G.REF_SOURCE:G.PREVIEW_SOURCE};meshCache.set(c,value);return value;
 }
 const scenarios=data.order.map(id=>({id,label:data.cases[id].family_id+' / '+data.cases[id].uncertainty_case+' - R0',parameters:Object.fromEntries(parameters.map(f=>{const [a,b]=f.id.split('.');return [f.id,data.cases[id][a][b]];}))}));
-export const foilClient={id:'foil-wind',version:'0.3.0-adapter.1',title:'FOIL Wind',description:'Client prive / laboratoire R0',classification:'private',parameters,defaults:scenarios[0].parameters,scenarios,
+export const foilClient={id:'foil-wind',version:'0.3.0-adapter.1',title:'FOIL Wind',description:'Client prive / laboratoire R0',classification:'private',parameters,defaults,artifactCatalog:scenarios[0].parameters,scenarios,
  period:p=>1/p['kinematics.frequency_hz'],
  validate(p){const errs=[],get=id=>p['geometry.'+id];
   if(get('arm_length_m')<=get('heave_stroke_pp_m')/2)errs.push('Longueur de bras <= demi-course.');
