@@ -68,6 +68,6 @@ export function safeDocumentTarget(doc,page){
  if(doc.mime!=='application/pdf'||!page)return raw;
  const clean=raw.split('#')[0];return clean+'#page='+page;
 }
-export function artifactProvenance(artifact,document){
- return artifact?.sourceKind||document?.sourceKind||'derived';
+export function artifactProvenance(artifact,doc){
+ return artifact?.sourceKind||doc?.sourceKind||'derived';
 }
