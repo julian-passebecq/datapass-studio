@@ -19,6 +19,8 @@ def test_python_authoring_rejects_duplicate_and_bad_bounds():
     app.parameter(p)
     with pytest.raises(ValueError): app.parameter(p)
     with pytest.raises(ValueError): NumberParameter('bad','Bad',5,0,2,.1)
+    with pytest.raises(ValueError): NumberParameter('nan','NaN',float('nan'),0,2,.1)
+    with pytest.raises(ValueError): ArtifactBinding('bad-source','Bad source','figure',('entity-a',),source_kind='author')
 
 def test_python_authoring_rejects_unknown_task_parameter():
     app=(StudioApp('demo-app','Demo').view(ViewSpec('lab','Lab','lab')).task(TaskSpec('evaluate','Evaluate',('parameter.missing',),('metrics',))))
