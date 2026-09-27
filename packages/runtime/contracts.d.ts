@@ -57,3 +57,15 @@ export type StudioLayoutNode =
   | {id:string;kind:'tabs';defaultTab:string;tabs:{id:string;label:string;child:StudioLayoutNode}[]}
   | {id:string;kind:'stack';direction:'horizontal'|'vertical';gap:number;children:StudioLayoutNode[]};
 export interface StudioLayoutDocument {format:'datapass.studio.layout';version:1;id:string;title:string;root:StudioLayoutNode;}
+export interface StudioChartSpec {
+  format:'datapass.studio.chart';version:1;id:string;title:string;kind:'line'|'bar'|'scatter';
+  x:{label:string;unit:string;type:'number'|'category'};y:{label:string;unit:string;type:'number'};
+  series:{id:string;label:string;points:[number|string,number|null][]}[];
+  sourceKind:'synthetic'|'private-reference'|'user-reference'|'derived';note:string;
+}
+export interface StudioTableSpec {
+  format:'datapass.studio.table';version:1;id:string;title:string;
+  columns:{id:string;label:string;type:'string'|'number'|'boolean';unit:string}[];
+  rows:{id:string;values:Record<string,string|number|boolean|null>}[];
+  sourceKind:'synthetic'|'private-reference'|'user-reference'|'derived';note:string;
+}
