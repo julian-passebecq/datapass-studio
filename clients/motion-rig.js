@@ -12,6 +12,11 @@ const parameters=[
   parameter('phaseOffset','D\u00e9phasage','\u00b0',0,180,5,'Mouvement',['pose'])
 ];
 const defaults={span:6,stroke:2.6,arm:3.2,height:4.8,chord:.75,frequency:.4,pitch:24,phaseOffset:90};
+const artifactCatalog={documents:[{id:'motion-note',title:'Note de conception synthetique',mime:'application/pdf',sourceKind:'synthetic',pages:4,sourceLabel:'Fixture publique · aucun PDF source embarque'}],artifacts:[
+ {id:'motion-profile',title:'Profil du panneau A',kind:'figure',documentId:'motion-note',page:2,entityIds:['panel-a','arm-a'],phase:.25,region:[.10,.20,.76,.34],preview:{plane:'side'},sourceKind:'synthetic',summary:'Repere de demonstration liant un mobile 3D, sa projection et une zone de document.'},
+ {id:'motion-pivot',title:'Pivot et chassis',kind:'document-region',documentId:'motion-note',page:3,entityIds:['pivot-a','head','bearing'],phase:.50,region:[.18,.30,.58,.27],preview:{plane:'front'},sourceKind:'synthetic',summary:'Exemple de liaison plusieurs-entites vers une meme region documentaire.'},
+ {id:'motion-base',title:'Implantation du support',kind:'figure',documentId:'motion-note',page:4,entityIds:['base','tower'],region:[.16,.18,.68,.48],preview:{plane:'top'},sourceKind:'synthetic',summary:'Exemple de repere statique pour verifier la continuite de selection entre vues.'}
+]};
 const meshCache=new WeakMap();
 function geometry(p){
  if(meshCache.has(p))return meshCache.get(p);
@@ -37,6 +42,7 @@ export function pose(p,phase){const out={};for(const [id,side,offset] of [['a',1
 export const motionRig={
  id:'motion-rig',title:'Motion Rig',description:'Client de r\u00e9f\u00e9rence synth\u00e9tique',classification:'synthetic',version:'1.0.0',parameters,defaults,
  period:p=>1/p.frequency,
+ artifactCatalog,
  scenarios:[{id:'standard',label:'Standard',parameters:defaults},{id:'compact',label:'Compact',parameters:{...defaults,span:3.5,stroke:1.4,arm:2.4,height:3.4}}],
  validate:p=>p.arm<=p.stroke/2?['Le bras doit depasser la demi-course.']:[],
  frame(p,phase,view){const st=pose(p,phase),yaw=rotateZ(view.yaw*Math.PI/180);return {units:'m',source:'SYNTHETIC_MESH_NOT_CAD',warnings:['Mouvement prescrit. Pas de modele aeroelasticite ni de dimensionnement.'],parts:geometry(p).map(x=>{
