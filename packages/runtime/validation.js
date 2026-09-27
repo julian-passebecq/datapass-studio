@@ -75,7 +75,7 @@ export function validateDocument(client, doc) {
   if (typeof doc.scenarioId !== 'string' || !(client.scenarios || [{id:'default'}]).some(s=>s.id===doc.scenarioId)) throw new Error('Scenario inconnu.');
   if (!doc.view || typeof doc.view !== 'object' || Array.isArray(doc.view)) throw new Error('Vue invalide.');
   if (!Number.isFinite(doc.view.yaw) || doc.view.yaw < -180 || doc.view.yaw > 180 || !Number.isFinite(doc.view.explode) || doc.view.explode<0 || doc.view.explode>1) throw new Error('Pose de presentation invalide.');
-  if (!['lab','plans','compare','references','explain'].includes(doc.view.mode)) throw new Error('Mode inconnu.');
+  if (!['lab','plans','compare','references','data','explain'].includes(doc.view.mode)) throw new Error('Mode inconnu.');
   if (!['iso','front','side','top'].includes(doc.view.camera)) throw new Error('Camera inconnue.');
   if (typeof doc.view.edges !== 'boolean' || typeof doc.view.ghost !== 'boolean' || typeof doc.view.grid !== 'boolean') throw new Error('Options de vue invalides.');
   if (!Array.isArray(doc.hidden) || doc.hidden.length > 500 || doc.hidden.some(x=>typeof x!=='string')) throw new Error('Visibilite invalide.');
