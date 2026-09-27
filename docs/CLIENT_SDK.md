@@ -65,6 +65,17 @@ const layout = {
 
 Validation bounds depth/node counts and rejects duplicate node IDs, duplicate slot placements, unknown fields and undeclared slot references. This is a reusable layout grammar, **not yet a drag/drop docking editor**. See `examples/layout-document.js` and `schemas/layout.schema.json`.
 
+## Analytical data views
+
+Studio now has portable inert contracts for ordinary analytical presentation:
+
+- `datapass.studio.chart/1`: bounded line, bar and scatter series, numeric/category axes, source classification and notes.
+- `datapass.studio.table/1`: typed scalar columns/rows with stable IDs, source classification and notes.
+- `ChartView`: the current dependency-free native SVG reference renderer.
+- `DataGrid`: scrollable sortable React table for the same portable table contract.
+
+These contracts intentionally do **not** make ConceptMotion a general chart library. A future genuine D3 adapter can consume `StudioChartSpec` without changing application/domain state. The native renderer remains useful for offline/zero-dependency builds. See `examples/data-dashboard.js` and the chart/table JSON Schemas.
+
 ## Reactive derivation and async tasks
 
 Use `ReactiveGraph` when a client has local derived values that should update only when their declared inputs change. Use `TaskRegistry` + `TaskCoordinator` when work is asynchronous, expensive or authoritative and must be cancellable/revision guarded. They are independent of React and of any client domain. See `docs/REACTIVE_RUNTIME.md` and `examples/reactive-runtime.js`.
