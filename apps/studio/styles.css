@@ -65,3 +65,6 @@
 .data-layout-host .studio-layout-slot{padding:12px}.data-layout-host .studio-layout-tabpanel>.studio-layout-slot{padding:10px}
 .data-layout-host .studio-chart{height:100%}.data-layout-host .studio-chart svg{max-height:405px}
 @media(max-width:860px){.data-mode-head{display:block}.data-mode-head p{text-align:left;margin-top:8px}.data-layout-host{height:auto;min-height:760px}.data-layout-host .studio-layout-split.horizontal{grid-template-rows:auto auto}.data-layout-host .studio-layout-slot{min-height:340px}}
+
+.document-image-wrap{position:relative;display:inline-block;max-width:100%;line-height:0}.document-image-wrap .document-image{display:block}.document-region.live{z-index:2;box-shadow:0 0 0 2px #fff8 inset,0 0 0 1px #126b76;background:#2694a025}
+.pdf-region-locator{position:absolute;left:30px;bottom:28px;z-index:3;max-width:360px;background:#fffffff2;border:1px solid #bcd7dc;border-left:3px solid var(--accent);border-radius:4px;padding:8px 10px;color:#526d77;box-shadow:0 3px 12px #213b4520}.pdf-region-locator strong,.pdf-region-locator span,.pdf-region-locator small{display:block}.pdf-region-locator strong{font-size:9px;color:#315d66}.pdf-region-locator span{font:8px Consolas,monospace;margin-top:3px}.pdf-region-locator small{font-size:7px;line-height:1.45;margin-top:4px;color:#82969e}
