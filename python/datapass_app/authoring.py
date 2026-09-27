@@ -52,12 +52,12 @@ class NumberParameter:
 class ViewSpec:
     id: str
     label: str
-    kind: Literal["lab","plans","compare","references","explain","custom"] = "custom"
+    kind: Literal["lab","plans","compare","references","data","explain","custom"] = "custom"
     icon: str = "panel"
     description: str = ""
     def __post_init__(self) -> None:
         _id(self.id,"view id"); _text(self.label,"view label",120)
-        if self.kind not in {"lab","plans","compare","references","explain","custom"}: raise ValueError("invalid view kind")
+        if self.kind not in {"lab","plans","compare","references","data","explain","custom"}: raise ValueError("invalid view kind")
         if not isinstance(self.icon,str) or len(self.icon)>120 or not isinstance(self.description,str) or len(self.description)>4000: raise ValueError("invalid view metadata")
 
 @dataclass(frozen=True)
