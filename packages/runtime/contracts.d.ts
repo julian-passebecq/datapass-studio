@@ -35,3 +35,18 @@ export interface WorkspaceDocument {
   selection: string|null; hidden: string[]; view: Record<string,Json>;
   provenance: {classification: string; source: string; reviewed: false};
 }
+export interface StudioAppManifest {
+  format:'datapass.studio.app'; schemaVersion:1; id:string; title:string; version:string; description:string;
+  classification:'synthetic'|'private';
+  parameters:{id:string;label:string;default:number;min:number;max:number;step:number;unit:string;group:string;affects:string[];note:string}[];
+  views:{id:string;label:string;kind:'lab'|'plans'|'compare'|'references'|'explain'|'custom';icon:string;description:string}[];
+  tasks:{id:string;label:string;input_nodes:string[];output_nodes:string[];revision_guarded:boolean;cancellable:boolean}[];
+  artifacts:{id:string;title:string;kind:'figure'|'document-region'|'image'|'code'|'table';entity_ids:string[];document_id:string|null;page:number|null;phase:number|null;source_kind:'synthetic'|'private-reference'|'user-reference'|'derived'}[];
+}
+export interface SessionTraceEvent {
+  seq:number;at:number;type:'parameter'|'scenario'|'selection'|'visibility'|'view'|'playback'|'task'|'artifact'|'import'|'export'|'custom';
+  action:string;entityId:string|null;inputRevision:number|null;phase:number|null;meta?:Record<string,string|number|boolean|null>;
+}
+export interface SessionTraceDocument {format:'datapass.studio.trace';version:1;clientId:string;clientVersion:string;startedAt:number|null;exportedAt:number;events:SessionTraceEvent[];}
+export interface ReactiveNodeInfo {id:string;kind:'source'|'computed';deps:string[];revision:number;dirty:boolean;meta:Record<string,Json>;}
+export interface TaskRun<T=Json> {runId:string;taskId:string;key:string;inputRevision:number;status:'running'|'progress'|'ready'|'stale'|'superseded'|'cancelled'|'error';progress:number;message:string;value?:T;}
