@@ -34,10 +34,10 @@ That optional `portable-vendor` directory is not committed to GitHub.
 
 ## Implemented
 
-- Three independent public synthetic clients: **Motion Rig**, **Transfer Bench** and **Signal Lab**. The third client is analytical rather than a mechanism, so the shared runtime is exercised outside the FOIL/3D-mechanics shape. Client switches preserve drafts within the session.
+- Four independent public synthetic clients: **Motion Rig**, **Transfer Bench**, **Signal Lab** and **ETL Pipeline**. ETL Pipeline exercises Airflow/lakehouse/BI-style flow and code surfaces, so the shared runtime is no longer shaped around FOIL or mechanical scenes. Client switches preserve drafts within the session.
 - Native WebGL rendering, CPU Canvas 3D fallback and final SVG fallback; orbit, pan, zoom, camera presets, stable-id picking, visibility, ghosting and exploded presentation.
 - Shared 3D, face/profile/top SVG views, assembly, parameters, parts table and one playback timeline.
-- Six coordinated compositions: Laboratory, orthographic plans, immutable baseline/candidate comparison, **References**, analytical **Data** and display-only explanation.
+- Six coordinated compositions: Laboratory, orthographic plans, immutable baseline/candidate comparison, **References**, analytical **Data** and display-only explanation. Data can expand into flow/code tabs when a client declares those inert specs.
 - Generic artifact/document bindings: a stable scene entity can point to figures, document regions, images, code or table references. The References workspace synchronizes document items, 3D/2D selection and optional playback phase.
 - Session-local PDF/PNG/JPEG/WebP opening for a declared document slot. Local object URLs are not persisted or exported; no private document bytes are added to the public repository.
 - Grouped parameter undo/redo, revisioned requests, stale-result rejection, validated JSON imports with review, and explicit provenance.

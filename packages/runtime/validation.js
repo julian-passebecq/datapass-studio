@@ -1,4 +1,6 @@
 import {validateArtifactCatalog} from './artifacts.js';
+import {validateFlowSpec} from './flow-spec.js';
+import {validateCodeSpec} from './code-spec.js';
 /** Bounded inert-data validation. The serialized format never contains executable expressions. */
 export const MAX_JSON_BYTES = 1024 * 1024;
 const forbidden = new Set(['__proto__', 'prototype', 'constructor']);
@@ -64,6 +66,11 @@ export function validateClient(client) {
   const frame=client.frame(client.defaults,0,{yaw:0,explode:0,scenarioId});
   const entityIds=new Set((frame?.parts||[]).map(p=>p.id));
   validateArtifactCatalog(client.artifactCatalog,entityIds);
+  if(client.flowSpec){
+    const flow=validateFlowSpec(client.flowSpec);
+    for(const node of flow.nodes)for(const entityId of node.entityIds)if(!entityIds.has(entityId))throw new Error('Flow entity is unknown: '+entityId);
+  }
+  if(client.codeSpec)validateCodeSpec(client.codeSpec);
   return client;
 }
 export function validateDocument(client, doc) {

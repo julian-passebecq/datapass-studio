@@ -24,6 +24,8 @@ export interface ClientDefinition {
   metrics(parameters: Record<string,number>, context?: {scenarioId?: string}): Metric[];
   explain?: {title: string; body: string; entityId?: string; phase: number; code?: string}[];
   artifactCatalog?: ArtifactCatalog;
+  flowSpec?: StudioFlowSpec;
+  codeSpec?: StudioCodeSpec;
 }
 export interface EvaluationRequest {
   version: 1; requestId: string; clientId: string; scenarioId: string;

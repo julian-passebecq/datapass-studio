@@ -76,6 +76,10 @@ Studio now has portable inert contracts for ordinary analytical presentation:
 
 These contracts intentionally do **not** make ConceptMotion a general chart library. A future genuine D3 adapter can consume `StudioChartSpec` without changing application/domain state. The native renderer remains useful for offline/zero-dependency builds. See `examples/data-dashboard.js` and the chart/table JSON Schemas.
 
+### Flow and code surfaces
+
+A client may additionally expose trusted-source `flowSpec` and `codeSpec` values. `datapass.studio.flow/1` describes bounded nodes/edges (source, transform, store, model, report, service, task, decision, note) with optional stable scene-entity links. `FlowView` provides zoom, direct-neighbor focus and selection callbacks. `datapass.studio.code/1` carries bounded source text plus line highlights; `CodeView` is read-only and never evaluates the text. `examples/etl-workspace.js` shows an Airflow → Databricks → Power BI-style synthetic composition.
+
 ## Reactive derivation and async tasks
 
 Use `ReactiveGraph` when a client has local derived values that should update only when their declared inputs change. Use `TaskRegistry` + `TaskCoordinator` when work is asynchronous, expensive or authoritative and must be cancellable/revision guarded. They are independent of React and of any client domain. See `docs/REACTIVE_RUNTIME.md` and `examples/reactive-runtime.js`.

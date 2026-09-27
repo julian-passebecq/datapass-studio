@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {motionRig} from '../clients/motion-rig.js';import {transferBench} from '../clients/transfer-bench.js';
+import {motionRig} from '../clients/motion-rig.js';import {transferBench} from '../clients/transfer-bench.js';import {signalLab} from '../clients/signal-lab.js';import {etlPipeline} from '../clients/etl-pipeline.js';
 import {WorkspaceStore,PlaybackStore} from '../packages/runtime/store.js';
 import {boundedJson,canonical,validateClient,validateDocument,validateParameters,validateFrame,validateEvaluationResponse} from '../packages/runtime/validation.js';
 import {SaveQueue} from '../packages/runtime/persistence.js';
@@ -11,7 +11,7 @@ const result=req=>({...req,metrics:[{id:'x',label:'X',value:1,unit:'m',note:'syn
 test('canonical JSON independent of key insertion order',()=>assert.equal(canonical({z:1,a:[3,2]}),canonical({a:[3,2],z:1})));
 test('JSON rejects prototype and depth attacks',()=>{assert.throws(()=>boundedJson('{"__proto__":1}'));assert.throws(()=>boundedJson('['.repeat(30)+'1'+']'.repeat(30)));});
 test('JSON byte limit includes multibyte characters',()=>assert.throws(()=>boundedJson('"'+String.fromCodePoint(233).repeat(10)+'"',15)));
-test('both unrelated clients satisfy the same contract',()=>{assert.equal(validateClient(motionRig),motionRig);assert.equal(validateClient(transferBench),transferBench);});
+test('unrelated public clients satisfy the same contract',()=>{for(const client of [motionRig,transferBench,signalLab,etlPipeline])assert.equal(validateClient(client),client);});
 test('client duplicate fields rejected',()=>assert.throws(()=>validateClient({...motionRig,parameters:[...motionRig.parameters,motionRig.parameters[0]]})));
 test('unknown parameter, bool, NaN and out-of-bounds are rejected atomically',()=>{const s=store(),before=s.state.parameters;for(const [k,v]of [['extra',5],['span',true],['span',NaN],['span',Infinity],['span',100]])assert.equal(s.updateParameter(k,v),false);assert.equal(s.state.parameters,before);assert.equal(s.state.revision,0);});
 test('dependency validation rejects impossible geometry',()=>{const c={...motionRig,parameters:motionRig.parameters.map(p=>p.id==='arm'?{...p,min:.01}:p)};assert.ok(validateParameters(c,{...c.defaults,arm:.1}).length);});
@@ -48,8 +48,9 @@ test('older rejected request cannot overwrite a newer successful result',async()
 test('presentation mutation refuses unknown keys and nonboolean flags',()=>{const s=store();s.setView({script:'bad'});s.setView({edges:'true'});assert.equal(s.state.view.script,undefined);assert.equal(s.state.view.edges,true);assert.equal(s.state.dirty,false);});
 
 
-test('artifact catalogs on unrelated clients validate as inert data',()=>{for(const client of [motionRig,transferBench]){const cat=artifactCatalog(client);assert.ok(cat.artifacts.length>0);assert.ok(cat.documents.length>0);validateArtifactCatalog(cat,new Set(client.frame(client.defaults,0,{yaw:0,explode:0,scenarioId:client.scenarios?.[0]?.id}).parts.map(p=>p.id)));}});
+test('artifact catalogs on unrelated clients validate as inert data',()=>{for(const client of [motionRig,transferBench,signalLab,etlPipeline]){const cat=artifactCatalog(client);assert.ok(cat.artifacts.length>0);assert.ok(cat.documents.length>0);validateArtifactCatalog(cat,new Set(client.frame(client.defaults,0,{yaw:0,explode:0,scenarioId:client.scenarios?.[0]?.id}).parts.map(p=>p.id)));}});
 test('artifact selection follows stable scene identity without domain knowledge',()=>{const cat=artifactCatalog(motionRig),linked=artifactsForEntity(cat,'panel-a');assert.ok(linked.some(a=>a.id==='motion-profile'));assert.equal(artifactForSelection(cat,'panel-a'),'motion-profile');assert.equal(documentForArtifact(cat,linked[0]).id,'motion-note');});
 test('artifact contract rejects external URLs and dangling scene identities',()=>{const external={documents:[{id:'doc-x',title:'X',mime:'application/pdf',sourceKind:'synthetic',url:'https://example.com/a.pdf'}],artifacts:[]};assert.throws(()=>validateArtifactCatalog(external));const bad={...motionRig,artifactCatalog:{...motionRig.artifactCatalog,artifacts:[{...motionRig.artifactCatalog.artifacts[0],entityIds:['missing-part']}]}};assert.throws(()=>validateClient(bad));});
 test('local PDF target is page-addressable without executable URL schemes',()=>{assert.equal(safeDocumentTarget({url:'./public/private-client/reference.pdf',mime:'application/pdf'},7),'./public/private-client/reference.pdf#page=7');assert.throws(()=>safeDocumentTarget({url:'javascript:alert(1)',mime:'application/pdf'},1));});
 test('reference workspace mode survives guarded document roundtrip',()=>{const s=store();s.setView({mode:'references'});const doc=s.document();validateDocument(motionRig,doc);const t=store();t.importDocument(doc);assert.equal(t.state.view.mode,'references');});
+test('ETL flow and code specs are validated against stable scene identities',()=>{validateClient(etlPipeline);const ids=new Set(etlPipeline.frame(etlPipeline.defaults,0,{yaw:0,explode:0,scenarioId:'standard'}).parts.map(p=>p.id));for(const node of etlPipeline.flowSpec.nodes)for(const id of node.entityIds)assert.ok(ids.has(id));assert.equal(etlPipeline.codeSpec.format,'datapass.studio.code');});

@@ -172,6 +172,13 @@ def main():
             assert_true(page.locator('.metric-value').count()>=4)
             page.get_by_role('combobox',name='Client actif').select_option(client);assert_true(page.locator('h1').inner_text()!= 'Signal Lab')
         check('third analytical client proves the runtime is not FOIL/mechanics-specific',third_client)
+        def fourth_client_workbench():
+            page.get_by_role('combobox',name='Client actif').select_option('etl-pipeline');assert_true(page.locator('h1').inner_text()=='ETL Pipeline');assert_true(page.locator('canvas[data-triangles]').count()==1)
+            mode('Données');expect(page.locator('.studio-flow')).to_be_visible();assert_true(page.locator('.flow-node').count()>=7)
+            page.get_by_role('tab',name='Code').click();expect(page.locator('.studio-code-view')).to_be_visible();assert_true(page.locator('.code-line').count()>=5)
+            page.get_by_role('tab',name='Flux').click();page.locator('.flow-node[aria-label="Vector analysis"]').click();assert_true(page.locator('.studio-flow-inspector h3').inner_text()=='Vector analysis')
+            page.get_by_role('combobox',name='Client actif').select_option(client);assert_true(page.locator('h1').inner_text()!= 'ETL Pipeline')
+        check('fourth ETL client composes flow, code, data and scene through shared contracts',fourth_client_workbench)
         def renderer_recovery():
             if renderer!='native-webgl': return
             mode('Laboratoire 3D');canvas=page.locator('canvas[data-renderer="native-webgl"]');canvas.evaluate("c=>c.dispatchEvent(new Event('webglcontextlost',{cancelable:true}))")

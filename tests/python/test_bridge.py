@@ -12,7 +12,7 @@ def request(**patch):
 def client(): return TestClient(create_app(public_registry()))
 def post(c,data,**kwargs): return c.post('/api/v1/evaluate',json=data,headers={'X-Studio-Request':'1',**kwargs})
 def test_health_lists_only_explicit_clients(client):
-    assert client.get('/api/health').json()['clients']==['motion-rig','transfer-bench']
+    assert client.get('/api/health').json()['clients']==['motion-rig','transfer-bench','signal-lab','etl-pipeline']
 def test_reference_evaluation_correlated_and_synthetic(client):
     r=post(client,request());assert r.status_code==200
     d=r.json();assert d['inputRevision']==4 and d['requestId']=='test-1'
@@ -50,3 +50,10 @@ def test_registry_duplicate_and_arbitrary_callable_guard():
 def test_second_domain_uses_same_protocol(client):
     d=request();d.update(clientId='transfer-bench',parameters=dict(length=7,width=1.8,height=1.4,lift=1.3,frequency=.25))
     r=post(client,d);assert r.status_code==200 and r.json()['metrics'][2]['value']==4
+def test_signal_domain_uses_same_protocol(client):
+    d=request();d.update(clientId='signal-lab',scenarioId='standard',parameters=dict(amplitude=1.2,frequency=.65,phaseLag=35,damping=.22,gain=1.35,spacing=2.4))
+    r=post(client,d);assert r.status_code==200 and r.json()['metrics'][0]['id']=='peak'
+
+def test_etl_domain_uses_same_protocol(client):
+    d=request();d.update(clientId='etl-pipeline',scenarioId='standard',parameters=dict(inputRate=180,partitions=8,workers=4,shuffleMB=640,batchMinutes=5))
+    r=post(client,d);assert r.status_code==200 and r.json()['metrics'][0]['value']==260

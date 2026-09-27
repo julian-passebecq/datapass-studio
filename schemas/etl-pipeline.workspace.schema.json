@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ETL Pipeline workspace",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "version",
+    "clientId",
+    "clientVersion",
+    "scenarioId",
+    "parameters",
+    "revision",
+    "selection",
+    "hidden",
+    "view",
+    "provenance"
+  ],
+  "properties": {
+    "format": {
+      "const": "datapass.studio.workspace"
+    },
+    "version": {
+      "const": 1
+    },
+    "clientId": {
+      "const": "etl-pipeline"
+    },
+    "clientVersion": {
+      "const": "1.0.0"
+    },
+    "scenarioId": {
+      "enum": [
+        "standard",
+        "high-volume"
+      ]
+    },
+    "parameters": {
+      "type": "object",
+      "required": [
+        "inputRate",
+        "partitions",
+        "workers",
+        "shuffleMB",
+        "batchMinutes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "inputRate": {
+          "type": "number",
+          "minimum": 20,
+          "maximum": 500
+        },
+        "partitions": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 64
+        },
+        "workers": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "shuffleMB": {
+          "type": "number",
+          "minimum": 50,
+          "maximum": 2400
+        },
+        "batchMinutes": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 30
+        }
+      }
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "selection": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "hidden": {
+      "type": "array",
+      "maxItems": 500,
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "view": {
+      "type": "object",
+      "required": [
+        "mode",
+        "camera",
+        "yaw",
+        "explode",
+        "edges",
+        "ghost",
+        "grid"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "lab",
+            "plans",
+            "compare",
+            "references",
+            "data",
+            "explain"
+          ]
+        },
+        "camera": {
+          "enum": [
+            "iso",
+            "front",
+            "side",
+            "top"
+          ]
+        },
+        "yaw": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "explode": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "edges": {
+          "type": "boolean"
+        },
+        "ghost": {
+          "type": "boolean"
+        },
+        "grid": {
+          "type": "boolean"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": [
+        "classification",
+        "source",
+        "reviewed"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "classification": {
+          "const": "synthetic"
+        },
+        "source": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "reviewed": {
+          "const": false
+        }
+      }
+    }
+  }
+}

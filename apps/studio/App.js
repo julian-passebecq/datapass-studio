@@ -4,6 +4,8 @@ import {h,useWorkspace,Icon,IconButton,Button,Badge,Panel,PanelBoundary,Modal,Me
 import {ArtifactWorkspace} from '../../packages/react/artifact-workspace.js';
 import {LayoutHost} from '../../packages/react/LayoutHost.js';
 import {ChartView,DataGrid} from '../../packages/react/DataViews.js';
+import {FlowView} from '../../packages/react/FlowView.js';
+import {CodeView} from '../../packages/react/CodeView.js';
 import {Assembly,Inspector,PartsTable,SelectionBar} from './panels.js';
 import {exportPlanSvg,escapeXml} from '../../packages/scene/projection.js';
 const MODE_LABELS={lab:'Laboratoire 3D',plans:'Plans 2D',compare:'Comparer',references:'Références',data:'Données',explain:'Expliquer'};
@@ -62,15 +64,27 @@ function Explanation({store,playback}){const [step,setStep]=useState(0),steps=st
   h('div',{className:'step-actions'},h(Button,{disabled:step===0,onClick:()=>activate(step-1)},'Pr\u00e9c\u00e9dent'),h(Button,{disabled:step===steps.length-1,onClick:()=>activate(step+1),className:'primary'},'Suivant'))));
 }
 function DataDashboard({store,playback}){
- const s=useWorkspace(store),sourceKind=store.client.classification==='private'?'private-reference':'synthetic';
- const traces=useMemo(()=>store.client.traces(s.parameters,{scenarioId:s.scenarioId}),[store.client,s.parameters,s.scenarioId]);
- const localMetrics=useMemo(()=>store.client.metrics(s.parameters,{scenarioId:s.scenarioId}),[store.client,s.parameters,s.scenarioId]);
+ const s=useWorkspace(store),client=store.client,sourceKind=client.classification==='private'?'private-reference':'synthetic';
+ const traces=useMemo(()=>client.traces(s.parameters,{scenarioId:s.scenarioId}),[client,s.parameters,s.scenarioId]);
+ const localMetrics=useMemo(()=>client.metrics(s.parameters,{scenarioId:s.scenarioId}),[client,s.parameters,s.scenarioId]);
  const metrics=s.evaluationStatus==='ready'&&s.evaluation?.metrics?s.evaluation.metrics:localMetrics;
  const chart=useMemo(()=>({format:'datapass.studio.chart',version:1,id:'cycle-dashboard',title:'Cycle synchronise',kind:'line',x:{label:'Phase',unit:'%',type:'number'},y:{label:'Valeur',unit:'unites natives',type:'number'},series:traces.slice(0,6).map(series=>({id:series.id,label:series.label+(series.unit?' · '+series.unit:''),points:series.values.map((value,index)=>[series.values.length<=1?0:index/(series.values.length-1)*100,value])})),sourceKind,note:'Series client au meme revision/scene; rendu SVG de reference.'}),[traces,sourceKind]);
  const metricTable=useMemo(()=>({format:'datapass.studio.table',version:1,id:'metric-dashboard',title:s.evaluationStatus==='ready'?'Metriques Python correlees':'Metriques locales',columns:[{id:'metric',label:'Indicateur',type:'string',unit:''},{id:'value',label:'Valeur',type:'number',unit:''},{id:'unit',label:'Unite',type:'string',unit:''},{id:'note',label:'Note',type:'string',unit:''}],rows:metrics.map((m,i)=>({id:'metric-'+i,values:{metric:m.label,value:m.value,unit:m.unit,note:m.note}})),sourceKind,note:s.evaluationStatus==='ready'?'Resultat lie a la revision '+s.revision:'Presentation locale; pas de validation scientifique.'}),[metrics,sourceKind,s.evaluationStatus,s.revision]);
- const parameterTable=useMemo(()=>({format:'datapass.studio.table',version:1,id:'parameter-dashboard',title:'Parametres actifs',columns:[{id:'parameter',label:'Parametre',type:'string',unit:''},{id:'value',label:'Valeur',type:'number',unit:''},{id:'unit',label:'Unite',type:'string',unit:''},{id:'affects',label:'Affecte',type:'string',unit:''}],rows:store.client.parameters.map((p,i)=>({id:'parameter-'+i,values:{parameter:p.label,value:s.parameters[p.id],unit:p.unit||'',affects:(p.affects||[]).join(', ')}})),sourceKind,note:'Etat courant de la revision '+s.revision}),[store.client,s.parameters,sourceKind,s.revision]);
- const layout=useMemo(()=>({format:'datapass.studio.layout',version:1,id:'data-dashboard',title:'Dashboard',root:{id:'root',kind:'split',axis:'horizontal',ratio:.62,resizable:true,first:{id:'chart',kind:'slot',slot:'chart',label:'Series'},second:{id:'tables',kind:'tabs',defaultTab:'metrics',tabs:[{id:'metrics',label:'Metriques',child:{id:'metrics-slot',kind:'slot',slot:'metrics'}},{id:'parameters',label:'Parametres',child:{id:'parameters-slot',kind:'slot',slot:'parameters'}}]}}}),[]);
- return h('div',{className:'data-mode'},h('div',{className:'data-mode-head'},h('div',null,h('span',{className:'label-small'},'ANALYSE · MEME ETAT'),h('h2',null,'Données et résultats')),h('p',null,'Les vues analytiques consomment les mêmes paramètres et la même révision. Aucun rerun Python pour le survol, le tri ou la lecture du cycle.')),h('div',{className:'data-layout-host'},h(LayoutHost,{layout,slots:{chart:h(ChartView,{spec:chart,height:330}),metrics:h(DataGrid,{spec:metricTable,maxHeight:470}),parameters:h(DataGrid,{spec:parameterTable,maxHeight:470})},strictSlots:true})),h(Timeline,{playback}));
+ const parameterTable=useMemo(()=>({format:'datapass.studio.table',version:1,id:'parameter-dashboard',title:'Parametres actifs',columns:[{id:'parameter',label:'Parametre',type:'string',unit:''},{id:'value',label:'Valeur',type:'number',unit:''},{id:'unit',label:'Unite',type:'string',unit:''},{id:'affects',label:'Affecte',type:'string',unit:''}],rows:client.parameters.map((p,i)=>({id:'parameter-'+i,values:{parameter:p.label,value:s.parameters[p.id],unit:p.unit||'',affects:(p.affects||[]).join(', ')}})),sourceKind,note:'Etat courant de la revision '+s.revision}),[client,s.parameters,sourceKind,s.revision]);
+ const rich=!!client.flowSpec||!!client.codeSpec;
+ const layout=useMemo(()=>{
+  if(!client.flowSpec&&!client.codeSpec)return {format:'datapass.studio.layout',version:1,id:'data-dashboard',title:'Dashboard',root:{id:'root',kind:'split',axis:'horizontal',ratio:.62,resizable:true,first:{id:'chart',kind:'slot',slot:'chart',label:'Series'},second:{id:'tables',kind:'tabs',defaultTab:'metrics',tabs:[{id:'metrics',label:'Metriques',child:{id:'metrics-slot',kind:'slot',slot:'metrics'}},{id:'parameters',label:'Parametres',child:{id:'parameters-slot',kind:'slot',slot:'parameters'}}]}}};
+  const tabs=[];
+  if(client.flowSpec)tabs.push({id:'flow',label:'Flux',child:{id:'flow-slot',kind:'slot',slot:'flow'}});
+  if(client.codeSpec)tabs.push({id:'code',label:'Code',child:{id:'code-slot',kind:'slot',slot:'code'}});
+  tabs.push({id:'chart',label:'Series',child:{id:'chart-slot',kind:'slot',slot:'chart'}},{id:'metrics',label:'Metriques',child:{id:'metrics-slot',kind:'slot',slot:'metrics'}},{id:'parameters',label:'Parametres',child:{id:'parameters-slot',kind:'slot',slot:'parameters'}});
+  return {format:'datapass.studio.layout',version:1,id:'data-workbench',title:'Data workbench',root:{id:'root',kind:'tabs',defaultTab:client.flowSpec?'flow':client.codeSpec?'code':'chart',tabs}};
+ },[client]);
+ const linkedFlowNode=client.flowSpec?.nodes.find(node=>node.entityIds.includes(s.selection))?.id||null;
+ const slots={chart:h(ChartView,{spec:chart,height:330}),metrics:h(DataGrid,{spec:metricTable,maxHeight:470}),parameters:h(DataGrid,{spec:parameterTable,maxHeight:470})};
+ if(client.flowSpec)slots.flow=h(FlowView,{spec:client.flowSpec,selectedId:linkedFlowNode,onSelect:id=>{const node=client.flowSpec.nodes.find(item=>item.id===id);if(node?.entityIds[0])store.select(node.entityIds[0]);}});
+ if(client.codeSpec)slots.code=h(CodeView,{spec:client.codeSpec,maxHeight:500});
+ return h('div',{className:'data-mode'},h('div',{className:'data-mode-head'},h('div',null,h('span',{className:'label-small'},rich?'DONNEES · FLUX · CODE':'ANALYSE · MEME ETAT'),h('h2',null,rich?'Données, flux et résultats':'Données et résultats')),h('p',null,'Les vues consomment le même état et la même révision. Tri, sélection, zoom et lecture du code restent locaux; aucun rerun Python implicite.')),h('div',{className:'data-layout-host '+(rich?'rich':'')},h(LayoutHost,{layout,slots,strictSlots:true})),h(Timeline,{playback}));
 }
 function Workspace({client,allClients,onClientChange,workspaceStore}){
  const store=workspaceStore,playback=useMemo(()=>new PlaybackStore(),[client]),s=useWorkspace(store);
