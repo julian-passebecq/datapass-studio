@@ -115,6 +115,9 @@ def main():
             cards.first.click();expect(page.locator('[data-testid="artifact-document"]')).to_be_visible();assert_true(page.locator('.artifact-preview .plan-svg').count()==1)
             assert_true(page.locator('.artifact-inspector .entity-link[aria-pressed="true"]').count()>=1)
         check('artifact workspace binds document reference, model entity and plan preview',references)
+        def evidence_binding():
+            payload=export_payload('Evidence pour adaptateur');d=json.loads(payload['text']);assert_true(len(d.get('artifactBindings',[]))>=1);assert_true(d['artifactBindings'][0]['entityIds']);assert_true('url' not in json.dumps(d['artifactBindings']))
+        check('evidence export carries reviewed-shape artifact linkage without document URLs',evidence_binding)
         def explain():
             mode('Expliquer');assert_true(page.locator('.explain-grid').count()==1);assert_true(page.locator('code').count()>0)
         check('display-only explanation mode composes scene and code',explain)
