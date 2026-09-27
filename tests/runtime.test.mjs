@@ -4,6 +4,7 @@ import {WorkspaceStore,PlaybackStore} from '../packages/runtime/store.js';
 import {boundedJson,canonical,validateClient,validateDocument,validateParameters,validateFrame,validateEvaluationResponse} from '../packages/runtime/validation.js';
 import {SaveQueue} from '../packages/runtime/persistence.js';
 import {RendererRegistry,LatestRequest} from '../packages/runtime/registry.js';
+import {artifactCatalog,artifactsForEntity,artifactForSelection,documentForArtifact,safeDocumentTarget,validateArtifactCatalog} from '../packages/runtime/artifacts.js';
 const store=()=>new WorkspaceStore(motionRig);
 const result=req=>({...req,metrics:[{id:'x',label:'X',value:1,unit:'m',note:'synthetic'}]});
 
@@ -45,3 +46,10 @@ test('scene validation rejects broken transforms and repeated ids',()=>{const f=
 
 test('older rejected request cannot overwrite a newer successful result',async()=>{const q=new LatestRequest();let fail;const a=q.run(()=>new Promise((resolve,reject)=>fail=reject));await q.run(async()=>2);fail(new Error('late old failure'));assert.equal((await a).current,false);});
 test('presentation mutation refuses unknown keys and nonboolean flags',()=>{const s=store();s.setView({script:'bad'});s.setView({edges:'true'});assert.equal(s.state.view.script,undefined);assert.equal(s.state.view.edges,true);assert.equal(s.state.dirty,false);});
+
+
+test('artifact catalogs on unrelated clients validate as inert data',()=>{for(const client of [motionRig,transferBench]){const cat=artifactCatalog(client);assert.ok(cat.artifacts.length>0);assert.ok(cat.documents.length>0);validateArtifactCatalog(cat,new Set(client.frame(client.defaults,0,{yaw:0,explode:0,scenarioId:client.scenarios?.[0]?.id}).parts.map(p=>p.id)));}});
+test('artifact selection follows stable scene identity without domain knowledge',()=>{const cat=artifactCatalog(motionRig),linked=artifactsForEntity(cat,'panel-a');assert.ok(linked.some(a=>a.id==='motion-profile'));assert.equal(artifactForSelection(cat,'panel-a'),'motion-profile');assert.equal(documentForArtifact(cat,linked[0]).id,'motion-note');});
+test('artifact contract rejects external URLs and dangling scene identities',()=>{const external={documents:[{id:'doc-x',title:'X',mime:'application/pdf',sourceKind:'synthetic',url:'https://example.com/a.pdf'}],artifacts:[]};assert.throws(()=>validateArtifactCatalog(external));const bad={...motionRig,artifactCatalog:{...motionRig.artifactCatalog,artifacts:[{...motionRig.artifactCatalog.artifacts[0],entityIds:['missing-part']}]}};assert.throws(()=>validateClient(bad));});
+test('local PDF target is page-addressable without executable URL schemes',()=>{assert.equal(safeDocumentTarget({url:'./public/private-client/reference.pdf',mime:'application/pdf'},7),'./public/private-client/reference.pdf#page=7');assert.throws(()=>safeDocumentTarget({url:'javascript:alert(1)',mime:'application/pdf'},1));});
+test('reference workspace mode survives guarded document roundtrip',()=>{const s=store();s.setView({mode:'references'});const doc=s.document();validateDocument(motionRig,doc);const t=store();t.importDocument(doc);assert.equal(t.state.view.mode,'references');});
