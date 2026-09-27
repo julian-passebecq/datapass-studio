@@ -7,3 +7,4 @@ export * from './reactive.js';
 export * from './tasks.js';
 export * from './trace.js';
 export * from './app-spec.js';
+export * from './layout.js';
