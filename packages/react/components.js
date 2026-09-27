@@ -21,7 +21,7 @@ export class PanelBoundary extends React.Component {
 export function Modal({title,children,onClose}){const ref=useRef(null);useEffect(()=>{ref.current?.showModal();return()=>ref.current?.close();},[]);return h('dialog',{ref,className:'modal',onCancel:e=>{e.preventDefault();onClose();}},h('header',null,h('h2',null,title),h(IconButton,{icon:'close',label:'Fermer',onClick:onClose})),h('div',{className:'modal-body'},children));}
 export function MetricStrip({metrics,status='local'}){return h('div',{className:'metric-strip'},...metrics.map(m=>h('div',{key:m.id,className:'metric'},h('div',{className:'metric-label'},m.label),h('div',{className:'metric-value'},m.value===null?'\u2014':Number(m.value).toLocaleString('fr-FR',{maximumFractionDigits:2}),h('span',null,m.unit)),h('div',{className:'metric-note'},m.note))),h('div',{className:'metric provenance-metric'},h('div',{className:'metric-label'},'Provenance'),h('div',{className:'provenance-value'},h('i',{className:'status-dot'}),status==='private'?'R\u00e9f\u00e9rence priv\u00e9e':'D\u00e9monstration'),h('div',{className:'metric-note'},'Aucune validation physique implicite')));}
 export function SceneViewport({store,playback,baseline=false,sceneApi=null,cameraSync=null,testId='scene-canvas',renderers=defaultRenderers}){
- const canvas=useRef(null),host=useRef(null),[error,setError]=useState(null),api=useRef(null),[engine,setEngine]=useState('WebGL'),[source,setSource]=useState(''),id=useRef(Symbol('scene'));
+ const canvas=useRef(null),host=useRef(null),[error,setError]=useState(null),[retry,setRetry]=useState(0),api=useRef(null),[engine,setEngine]=useState('WebGL'),[source,setSource]=useState(''),id=useRef(Symbol('scene'));
  useEffect(()=>{
   let live=true,lastScenario=null,offStore=()=>{},offPlay=()=>{},offCamera=()=>{};
   const start=async()=>{
@@ -40,8 +40,8 @@ export function SceneViewport({store,playback,baseline=false,sceneApi=null,camer
     if((globalThis.__STUDIO_QA__||new URL(location.href).searchParams.has('qa'))){canvas.current.__sceneApi=renderer;}
    }catch(e){if(live)setError(e.message);}
   };start();return()=>{live=false;offStore();offPlay();offCamera();api.current?.destroy();if(sceneApi)sceneApi.current=null;};
- },[store,playback,baseline,cameraSync,renderers]);
- return h('div',{className:'viewport',ref:host},error?h('div',{className:'svg-fallback'},h(PlanView,{store,playback,plane:'side',baseline}),h('div',{className:'fallback-notice',role:'status'},error)):h('canvas',{ref:canvas,'data-testid':testId,tabIndex:0,'aria-label':'Vue 3D interactive. Glisser pour tourner, molette pour zoomer, touches fleche pour orienter, Origine pour recadrer.'}),
+ },[store,playback,baseline,cameraSync,renderers,retry]);
+ return h('div',{className:'viewport',ref:host},error?h('div',{className:'svg-fallback'},h(PlanView,{store,playback,plane:'side',baseline}),h('div',{className:'fallback-notice',role:'status'},h('span',null,error),h(Button,{className:'compact',onClick:()=>{setError(null);setRetry(v=>v+1);}},'Reessayer le moteur 3D'))):h('canvas',{ref:canvas,'data-testid':testId,tabIndex:0,'aria-label':'Vue 3D interactive. Glisser pour tourner, molette pour zoomer, touches fleche pour orienter, Origine pour recadrer.'}),
   h('div',{className:'viewport-top'},h(Badge,null,baseline?'R\u00e9f\u00e9rence':'R\u00e9vision active'),h('span',{className:'engine-tag',title:source},error?'Projection SVG':engine+' \u00b7 local'),source&&h('span',{className:'mesh-source',title:source},source.includes('NOT_BREP')?'Apercu parametrique - pas BRep':source.includes('BREP')?'Maillage de reference BRep':'Geometrie synthetique')),
   h('div',{className:'viewport-bottom'},h('span',null,error?'Repli accessible':'Glisser : orbite \u00b7 Maj + glisser : d\u00e9placer \u00b7 Molette : zoom'),!error&&h(IconButton,{icon:'fit',label:'Recadrer la vue',onClick:()=>api.current?.fit()})));
 }
