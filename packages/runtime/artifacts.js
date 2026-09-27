@@ -62,10 +62,10 @@ export function documentForArtifact(catalog,artifact){
  if(!artifact?.documentId)return null;
  return (catalog?.documents||[]).find(d=>d.id===artifact.documentId)||null;
 }
-export function safeDocumentTarget(document,page){
- if(!document?.url)return null;
- const raw=safeLocalUrl(document.url);if(!raw)return null;
- if(document.mime!=='application/pdf'||!page)return raw;
+export function safeDocumentTarget(doc,page){
+ if(!doc?.url)return null;
+ const raw=safeLocalUrl(doc.url);if(!raw)return null;
+ if(doc.mime!=='application/pdf'||!page)return raw;
  const clean=raw.split('#')[0];return clean+'#page='+page;
 }
 export function artifactProvenance(artifact,document){
