@@ -44,6 +44,7 @@ That optional `portable-vendor` directory is not committed to GitHub.
 - DOM-free **ReactiveGraph** for explicit local dependency DAGs, plus a cancellable/revision-aware **TaskCoordinator** for bounded async work. These are client-owned primitives, not a global script-rerun engine.
 - Inert `datapass.studio.app/1` manifest with a matching Python authoring helper; it declares parameters/views/tasks/artifact bindings but never serializes callbacks or formulas.
 - Privacy-bounded `datapass.studio.trace/1` session trace. Studio records semantic interaction/task/export events without parameter values or document bytes, and exports it only on user action.
+- Inert `datapass.studio.layout/1` pane grammar plus React `LayoutHost`: reusable split/grid/tabs/stack composition with bounded validation and trusted slot rendering, without embedding React callbacks in JSON.
 - Source-mode IndexedDB storage with optimistic transaction conflict detection and latest-snapshot saves. Offline HTML intentionally uses memory.
 - Local workspace JSON, 3D PNG, vector SVG, static HTML report and evidence JSON exports. Evidence can carry inert artifact/document ids, page/source classification and bound entity ids, never the session-local document URL.
 - Optional private FOIL adapter: **12 parts, nine R0 cases, 34 fields**. The original verified Python kernel remains the authority for its conditional model calculations.
@@ -66,7 +67,7 @@ The separate delivered private workspace is already installed and built; see its
 packages/runtime       contracts, store, playback, reactive DAG, task/trace coordination, validation + registries
 packages/scene         transforms, primitives, picking, projected linework
 packages/renderers     WebGL / CPU Canvas and SVG chart geometry
-packages/react         reusable React view surfaces, including the artifact/document workspace
+packages/react         reusable React view surfaces, artifact/document workspace + generic LayoutHost
 apps/studio            one reference workbench composition
 clients                independent public domains
 python/datapass_app     trusted local evaluators and optional private connector
@@ -96,4 +97,4 @@ Read `docs/TEST_REPORT.md`, `docs/HOSTED_CI.md`, `docs/ARCHITECTURE.md`, `docs/R
 
 ## Deliberate limits
 
-No Streamlit-compatible API, Jupyter kernel, arbitrary Python execution, draggable layout editor, CAD solid operations or manufacturing drawings. The new reactive graph is an explicit client-owned DAG; it does not execute expressions from documents or emulate a whole-script rerun model. The document/reference pane is implemented, but there is **no PDF extraction/OCR, automatic figure detection or inferred bounding-box pipeline yet**. Canvas painter ordering and projected mesh linework are approximations. No multi-user authentication, cloud persistence, collaboration, public deployment or automatic publication is supplied by this pass.
+No Streamlit-compatible API, Jupyter kernel, arbitrary Python execution, draggable/dockable layout editor, CAD solid operations or manufacturing drawings. A bounded declarative layout grammar now exists, but it does not provide live drag/drop authoring. The new reactive graph is an explicit client-owned DAG; it does not execute expressions from documents or emulate a whole-script rerun model. The document/reference pane is implemented, but there is **no PDF extraction/OCR, automatic figure detection or inferred bounding-box pipeline yet**. Canvas painter ordering and projected mesh linework are approximations. No multi-user authentication, cloud persistence, collaboration, public deployment or automatic publication is supplied by this pass.
