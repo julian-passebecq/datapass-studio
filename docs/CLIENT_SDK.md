@@ -44,7 +44,7 @@ Supported artifact kinds in this pass are `figure`, `document-region`, `image`, 
 
 `createStudioRenderers()` returns a `RendererRegistry`. A mounted adapter supports `update(frame, presentation)`, `destroy()`, optionally `fit()`, `capture()`, `setCamera()`, diagnostics and screen-point helpers. The shell uses the same lifecycle for GPU and CPU renderers. A consumer can supply its own registry to `SceneViewport`.
 
-React consumers may compose `SceneViewport`, `PlanView`, `TraceChart`, `ComparisonTraceChart`, `Timeline`, `MetricStrip`, `ArtifactWorkspace`, `Panel`, `Modal`, `PanelBoundary` and the generic `LayoutHost`. The reference app's five modes (3D lab, plans, comparison, references, explanation) are example compositions, not a requirement to embed the entire Studio shell.
+React consumers may compose `SceneViewport`, `PlanView`, `TraceChart`, `ComparisonTraceChart`, `Timeline`, `MetricStrip`, `ArtifactWorkspace`, `Panel`, `Modal`, `PanelBoundary` and the generic `LayoutHost`. The reference app's six modes (3D lab, plans, comparison, references, analytical data, explanation) are example compositions, not a requirement to embed the entire Studio shell.
 
 ### Layout documents
 
