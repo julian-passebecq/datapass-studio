@@ -11,4 +11,4 @@ function Node({node,slots}){
  return h(Tabs,{node,slots});
 }
 function Tabs({node,slots}){const [active,setActive]=useState(node.defaultTab);const current=node.tabs.find(x=>x.id===active)||node.tabs[0];return h('section',{className:'studio-layout-tabs'},h('div',{role:'tablist',className:'studio-layout-tablist'},...node.tabs.map(tab=>h('button',{key:tab.id,type:'button',role:'tab','aria-selected':tab.id===current.id,className:tab.id===current.id?'active':'',onClick:()=>setActive(tab.id)},tab.label))),h('div',{role:'tabpanel',className:'studio-layout-tabpanel'},h(Node,{node:current.child,slots})));}
-export function LayoutHost({layout,slots={},className=''}){const value=validateLayoutDocument(layout,{knownSlots:Object.keys(slots)});return h('div',{className:'studio-layout '+className,'data-layout-id':value.id},h(Node,{node:value.root,slots}));}
+export function LayoutHost({layout,slots={},className='',strictSlots=false}){const value=validateLayoutDocument(layout,strictSlots?{knownSlots:Object.keys(slots)}:{});return h('div',{className:'studio-layout '+className,'data-layout-id':value.id},h(Node,{node:value.root,slots}));}
