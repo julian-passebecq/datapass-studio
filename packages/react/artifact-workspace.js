@@ -9,11 +9,13 @@ function DocumentSurface({document,artifact}){
  const target=document?.sessionLocal?(document.mime==='application/pdf'&&artifact?.page?document.url.split('#')[0]+'#page='+artifact.page:document.url):safeDocumentTarget(document,artifact?.page);
  const source=artifactProvenance(artifact,document);
  if(target&&document?.mime?.startsWith('image/'))return h('div',{className:'document-surface'},
-   h('img',{className:'document-image',src:target,alt:artifact?.title||document.title,loading:'lazy',referrerPolicy:'no-referrer'}),
+   h('div',{className:'document-image-wrap'},h('img',{className:'document-image',src:target,alt:artifact?.title||document.title,loading:'lazy',referrerPolicy:'no-referrer'}),
+     artifact?.region&&h('div',{className:'document-region live',style:{left:(artifact.region[0]*100)+'%',top:(artifact.region[1]*100)+'%',width:(artifact.region[2]*100)+'%',height:(artifact.region[3]*100)+'%'},role:'note','aria-label':'Region liee dans l image : '+artifact.title})),
    h('div',{className:'document-caption'},h(Badge,{tone:source},sourceLabel[source]||source),document.sourceLabel||document.title));
  if(target&&document?.mime==='application/pdf')return h('div',{className:'document-surface'},
    h('object',{className:'document-frame',data:target,type:'application/pdf','aria-label':document.title},
-     h('div',{className:'document-fallback'},h(Icon,{name:'folder',size:34}),h('strong',null,'Apercu PDF indisponible dans ce navigateur.'),h('p',null,'Le document reste une ressource locale du client.'))));
+     h('div',{className:'document-fallback'},h(Icon,{name:'folder',size:34}),h('strong',null,'Apercu PDF indisponible dans ce navigateur.'),h('p',null,'Le document reste une ressource locale du client.'))),
+   artifact?.region&&h('div',{className:'pdf-region-locator',role:'note'},h('strong',null,'Region liee'),h('span',null,'x '+Math.round(artifact.region[0]*100)+'% · y '+Math.round(artifact.region[1]*100)+'% · '+Math.round(artifact.region[2]*100)+'×'+Math.round(artifact.region[3]*100)+'%'),h('small',null,'Le lecteur PDF natif ouvre la page; le rectangle normalise reste une metadonnee Studio, sans faux zoom navigateur.')));
  return h('div',{className:'document-surface mock-document','data-testid':'artifact-document'},
    h('article',{className:'document-paper'},h('header',null,h('span',null,document?.title||'Document non fourni'),h('span',{className:'mono'},artifact?.page?'PAGE '+artifact.page:'SOURCE')),
      h('div',{className:'paper-rule'}),
