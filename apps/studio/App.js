@@ -1,9 +1,11 @@
 import React,{useState,useMemo,useEffect,useRef} from 'react';
 import {WorkspaceStore,PlaybackStore,WorkspaceRepository,SaveQueue,canonical,boundedJson,validateDocument,LatestRequest} from '../../packages/runtime/index.js';
-import {h,useWorkspace,Icon,IconButton,Button,Badge,Panel,PanelBoundary,Modal,MetricStrip,SceneViewport,PlanView,TraceChart,Timeline,download} from '../../packages/react/components.js';
+import {h,useWorkspace,Icon,IconButton,Button,Badge,Panel,PanelBoundary,Modal,MetricStrip,SceneViewport,PlanView,TraceChart,ComparisonTraceChart,Timeline,download} from '../../packages/react/components.js';
+import {ArtifactWorkspace} from '../../packages/react/artifact-workspace.js';
 import {Assembly,Inspector,PartsTable,SelectionBar} from './panels.js';
 import {exportPlanSvg,escapeXml} from '../../packages/scene/projection.js';
-const MODE_LABELS={lab:'Laboratoire 3D',plans:'Plans 2D',compare:'Comparer',explain:'Expliquer'};
+const MODE_LABELS={lab:'Laboratoire 3D',plans:'Plans 2D',compare:'Comparer',references:'Références',explain:'Expliquer'};
+const MODE_ICONS={lab:'cube',plans:'layers',compare:'compare',references:'folder',explain:'code'};
 const STATUS={idle:'Aucun calcul serveur',running:'Calcul en cours',ready:'Calcul li\u00e9 \u00e0 la r\u00e9vision',stale:'R\u00e9sultat ant\u00e9rieur \u00b7 obsol\u00e8te',error:'Calcul indisponible'};
 const SAVE={memory:'Session en memoire - exporter JSON',saved:'Enregistr\u00e9 localement',saving:'Enregistrement...',error:'Sauvegarde en erreur','not-saved':'Session locale'};
 function usePersistence(store){useEffect(()=>{
@@ -76,7 +78,7 @@ function Workspace({client,allClients,onClientChange,workspaceStore}){
   h('header',{className:'app-header'},h('div',{className:'brand'},h('img',{src:'./public/studio.svg',width:32,height:32,alt:''}),h('div',null,h('strong',null,'datapass',h('span',null,' studio')),h('small',null,'INTERACTIVE APP FRAMEWORK'))),
    h('div',{className:'header-divider'}),h('label',{className:'client-switch'},h('span',{className:'sr-only'},'Client actif'),h('select',{value:client.id,onChange:e=>onClientChange(e.target.value),'aria-label':'Client actif'},...allClients.map(c=>h('option',{key:c.id,value:c.id},c.title+(c.classification==='private'?' \u00b7 priv\u00e9':''))))),
    h('span',{className:'header-caption'},client.description),h('span',{className:'spacer'}),h('span',{className:'saved '+(s.saveStatus==='error'?'warning':'')},h('i',{className:'status-dot '+s.saveStatus}),SAVE[s.saveStatus]),h(Badge,{tone:'quiet'},'v0.1')),
-  h('div',{className:'app-body'},h('nav',{className:'rail','aria-label':'Modes du laboratoire'},...Object.keys(MODE_LABELS).map((m,i)=>h('button',{key:m,className:mode===m?'active':'',onClick:()=>store.setView({mode:m}),'aria-label':MODE_LABELS[m],title:MODE_LABELS[m]},h(Icon,{name:['cube','layers','compare','code'][i],size:21}))),h('span',{className:'spacer'}),h('div',{className:'rail-mark'},'DP')),
+  h('div',{className:'app-body'},h('nav',{className:'rail','aria-label':'Modes du laboratoire'},...Object.keys(MODE_LABELS).map((m,i)=>h('button',{key:m,className:mode===m?'active':'',onClick:()=>store.setView({mode:m}),'aria-label':MODE_LABELS[m],title:MODE_LABELS[m]},h(Icon,{name:MODE_ICONS[m],size:21}))),h('span',{className:'spacer'}),h('div',{className:'rail-mark'},'DP')),
   h('main',{id:'workspace',tabIndex:-1,className:'workspace'},
    h('div',{className:'project-bar'},h('div',null,h('div',{className:'breadcrumb'},'Clients / '+client.title+' / '+MODE_LABELS[mode]),h('div',{className:'project-title'},h('h1',null,client.title),h(Badge,{tone:client.classification==='private'?'private':'synthetic'},client.classification==='private'?'R\u00c9F\u00c9RENCE PRIV\u00c9E':'SYNTH\u00c9TIQUE'))),
     h('div',{className:'project-actions'},h('label',{className:'scenario-label'},h('span',null,'Configuration'),h('select',{'aria-label':'Configuration',value:s.scenarioId,onChange:e=>store.setScenario(e.target.value)},...(client.scenarios||[]).map(v=>h('option',{key:v.id,value:v.id},v.label)))),
