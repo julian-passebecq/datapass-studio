@@ -44,7 +44,26 @@ Supported artifact kinds in this pass are `figure`, `document-region`, `image`, 
 
 `createStudioRenderers()` returns a `RendererRegistry`. A mounted adapter supports `update(frame, presentation)`, `destroy()`, optionally `fit()`, `capture()`, `setCamera()`, diagnostics and screen-point helpers. The shell uses the same lifecycle for GPU and CPU renderers. A consumer can supply its own registry to `SceneViewport`.
 
-React consumers may compose `SceneViewport`, `PlanView`, `TraceChart`, `ComparisonTraceChart`, `Timeline`, `MetricStrip`, `ArtifactWorkspace`, `Panel`, `Modal` and `PanelBoundary`. The reference app's five modes (3D lab, plans, comparison, references, explanation) are example compositions, not a requirement to embed the entire Studio shell. They are not yet a freely draggable/dockable layout editor.
+React consumers may compose `SceneViewport`, `PlanView`, `TraceChart`, `ComparisonTraceChart`, `Timeline`, `MetricStrip`, `ArtifactWorkspace`, `Panel`, `Modal`, `PanelBoundary` and the generic `LayoutHost`. The reference app's five modes (3D lab, plans, comparison, references, explanation) are example compositions, not a requirement to embed the entire Studio shell.
+
+### Layout documents
+
+`datapass.studio.layout/1` is a separate inert pane-composition contract. It supports `slot`, horizontal/vertical `split`, `grid`, `tabs` and `stack`. Layout JSON never contains React nodes or callbacks: a consumer supplies a trusted `slots` map to `LayoutHost`.
+
+```js
+const layout = {
+  format: 'datapass.studio.layout', version: 1, id: 'analysis', title: 'Analysis',
+  root: {
+    id: 'root', kind: 'split', axis: 'horizontal', ratio: .34, resizable: true,
+    first: {id:'left', kind:'slot', slot:'figures'},
+    second: {id:'right', kind:'slot', slot:'document'}
+  }
+};
+
+<LayoutHost layout={layout} slots={{figures:<FigureList/>, document:<PdfViewer/>}} />
+```
+
+Validation bounds depth/node counts and rejects duplicate node IDs, duplicate slot placements, unknown fields and undeclared slot references. This is a reusable layout grammar, **not yet a drag/drop docking editor**. See `examples/layout-document.js` and `schemas/layout.schema.json`.
 
 ## Reactive derivation and async tasks
 
