@@ -1,5 +1,5 @@
 import React,{useState,useMemo,useEffect,useRef} from 'react';
-import {WorkspaceStore,PlaybackStore,WorkspaceRepository,SaveQueue,canonical,boundedJson,validateDocument,LatestRequest} from '../../packages/runtime/index.js';
+import {WorkspaceStore,PlaybackStore,WorkspaceRepository,SaveQueue,canonical,boundedJson,validateDocument,LatestRequest,artifactCatalog,artifactsForEntity,documentForArtifact} from '../../packages/runtime/index.js';
 import {h,useWorkspace,Icon,IconButton,Button,Badge,Panel,PanelBoundary,Modal,MetricStrip,SceneViewport,PlanView,TraceChart,ComparisonTraceChart,Timeline,download} from '../../packages/react/components.js';
 import {ArtifactWorkspace} from '../../packages/react/artifact-workspace.js';
 import {Assembly,Inspector,PartsTable,SelectionBar} from './panels.js';
@@ -32,8 +32,8 @@ function CameraChannel(){const listeners=new Set();return {publish:(cam,id)=>{fo
 function ExportDialog({store,playback,sceneApi,onClose}){
  const [message,setMessage]=useState(''),s=store.getSnapshot(),t=playback.getSnapshot();
  function svg(plane){download(store.client.id+'-'+plane+'-r'+s.revision+'.svg',exportPlanSvg(store.client.frame(s.parameters,t.phase,{...s.view,scenarioId:s.scenarioId}),plane,{title:store.client.title,revision:s.revision,phase:t.phase,selection:s.selection}),'image/svg+xml');setMessage('Projection SVG exportee.');}
- function evidence(){const value={format:'datapass.studio.evidence',version:1,clientId:store.client.id,clientVersion:store.client.version,
-   revision:s.revision,parameters:{...s.parameters},frame:{phase:t.phase,view:{...s.view}},selection:s.selection,
+ function evidence(){const catalog=artifactCatalog(store.client),artifactBindings=artifactsForEntity(catalog,s.selection).map(a=>{const d=documentForArtifact(catalog,a);return {artifactId:a.id,title:a.title,kind:a.kind,entityIds:[...a.entityIds],document:d?{id:d.id,title:d.title,sourceKind:d.sourceKind}:null,page:a.page||null,sourceKind:a.sourceKind||d?.sourceKind||'derived'};});const value={format:'datapass.studio.evidence',version:1,clientId:store.client.id,clientVersion:store.client.version,
+   revision:s.revision,parameters:{...s.parameters},frame:{phase:t.phase,view:{...s.view}},selection:s.selection,artifactBindings,
    evaluation:s.evaluationStatus==='ready'?s.evaluation:null,evaluationState:s.evaluationStatus,
    provenance:{classification:store.client.classification,reviewed:false,visibility:'private',claim:'illustrative-unless-explicit-source-evidence'},
    warnings:['A reviewed adapter is required before import into DiagramCloud.','No scientific validation is inferred from a successful software computation.']};
