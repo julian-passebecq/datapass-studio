@@ -2,7 +2,7 @@
 
 ## Scope
 
-Studio 0.1 is a visual-lab framework extracted through working clients, not an attempted rewrite of all the user's apps. The app root now provides five deliberate compositions: 3D lab, orthographic plans, comparison, document/artifact references and explanation. The library boundary is React plus portable data/artifact/renderer contracts, not Next.js or the FOIL domain.
+Studio 0.1 is a visual-lab framework extracted through working clients, not an attempted rewrite of all the user's apps. The app root now provides six deliberate compositions: 3D lab, orthographic plans, comparison, document/artifact references, analytical data and explanation. The library boundary is React plus portable data/artifact/renderer contracts, not Next.js or the FOIL domain.
 
 ## Ownership
 
