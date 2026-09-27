@@ -1,5 +1,5 @@
 import React,{useState,useMemo,useEffect,useRef} from 'react';
-import {WorkspaceStore,PlaybackStore,WorkspaceRepository,SaveQueue,canonical,boundedJson,validateDocument,LatestRequest,artifactCatalog,artifactsForEntity,documentForArtifact} from '../../packages/runtime/index.js';
+import {WorkspaceStore,PlaybackStore,WorkspaceRepository,SaveQueue,canonical,boundedJson,validateDocument,LatestRequest,artifactCatalog,artifactsForEntity,documentForArtifact,SessionTrace,manifestFromClient} from '../../packages/runtime/index.js';
 import {h,useWorkspace,Icon,IconButton,Button,Badge,Panel,PanelBoundary,Modal,MetricStrip,SceneViewport,PlanView,TraceChart,ComparisonTraceChart,Timeline,download} from '../../packages/react/components.js';
 import {ArtifactWorkspace} from '../../packages/react/artifact-workspace.js';
 import {Assembly,Inspector,PartsTable,SelectionBar} from './panels.js';
@@ -29,9 +29,12 @@ function usePersistence(store){useEffect(()=>{
    queue.chain.finally(()=>{queue.dispose();repo.close();});window.removeEventListener('beforeunload',close);};
  },[store]);}
 function CameraChannel(){const listeners=new Set();return {publish:(cam,id)=>{for(const f of listeners)f(cam,id);},subscribe:f=>{listeners.add(f);return()=>listeners.delete(f);}};}
-function ExportDialog({store,playback,sceneApi,onClose}){
+function ExportDialog({store,playback,sceneApi,trace,traceStartedAt,onClose}){
  const [message,setMessage]=useState(''),s=store.getSnapshot(),t=playback.getSnapshot();
- function svg(plane){download(store.client.id+'-'+plane+'-r'+s.revision+'.svg',exportPlanSvg(store.client.frame(s.parameters,t.phase,{...s.view,scenarioId:s.scenarioId}),plane,{title:store.client.title,revision:s.revision,phase:t.phase,selection:s.selection}),'image/svg+xml');setMessage('Projection SVG exportee.');}
+ function recordExport(kind){trace?.record('export',kind,{inputRevision:s.revision,phase:t.phase});}
+ function appManifest(){download(store.client.id+'-app-manifest.json',JSON.stringify(manifestFromClient(store.client),null,2));recordExport('app-manifest');setMessage('Manifeste declaratif exporte. Il ne contient aucun callback executable.');}
+ function sessionTrace(){download(store.client.id+'-session-trace.json',JSON.stringify(trace.export({clientId:store.client.id,clientVersion:store.client.version,startedAt:traceStartedAt}),null,2));recordExport('session-trace');setMessage('Trace de session exportee sans valeurs de parametres.');}
+ function svg(plane){download(store.client.id+'-'+plane+'-r'+s.revision+'.svg',exportPlanSvg(store.client.frame(s.parameters,t.phase,{...s.view,scenarioId:s.scenarioId}),plane,{title:store.client.title,revision:s.revision,phase:t.phase,selection:s.selection}),'image/svg+xml');recordExport('svg-'+plane);setMessage('Projection SVG exportee.');}
  function evidence(){const catalog=artifactCatalog(store.client),artifactBindings=artifactsForEntity(catalog,s.selection).map(a=>{const d=documentForArtifact(catalog,a);return {artifactId:a.id,title:a.title,kind:a.kind,entityIds:[...a.entityIds],document:d?{id:d.id,title:d.title,sourceKind:d.sourceKind}:null,page:a.page||null,sourceKind:a.sourceKind||d?.sourceKind||'derived'};});const value={format:'datapass.studio.evidence',version:1,clientId:store.client.id,clientVersion:store.client.version,
    revision:s.revision,parameters:{...s.parameters},frame:{phase:t.phase,view:{...s.view}},selection:s.selection,artifactBindings,
    evaluation:s.evaluationStatus==='ready'?s.evaluation:null,evaluationState:s.evaluationStatus,
@@ -41,9 +44,10 @@ function ExportDialog({store,playback,sceneApi,onClose}){
  function report(){const frame=store.client.frame(s.parameters,t.phase,{...s.view,scenarioId:s.scenarioId}),svgText=exportPlanSvg(frame,'side',{title:store.client.title,revision:s.revision,phase:t.phase,selection:s.selection});
    const metrics=s.evaluationStatus==='ready'?s.evaluation.metrics:store.client.metrics(s.parameters,{scenarioId:s.scenarioId});
    const html='<!doctype html><html lang="fr"><meta charset="utf-8"><title>'+escapeXml(store.client.title)+' - Snapshot</title><style>body{max-width:1000px;margin:40px auto;font:15px system-ui;color:#253740}svg{width:100%}table{border-collapse:collapse;width:100%}td,th{padding:10px;border-bottom:1px solid #ccc;text-align:left}small{color:#566} @media print{body{margin:0}}</style><h1>'+escapeXml(store.client.title)+'</h1><p>Revision '+s.revision+' | Phase '+(t.phase*100).toFixed(1)+'% | '+escapeXml(store.client.classification)+'</p>'+svgText+'<table><tr><th>Indicateur</th><th>Valeur</th><th>Note</th></tr>'+metrics.map(m=>'<tr><td>'+escapeXml(m.label)+'</td><td>'+escapeXml(m.value??'Non recalcule')+' '+escapeXml(m.unit)+'</td><td>'+escapeXml(m.note)+'</td></tr>').join('')+'</table><p><strong>Projection de maillage. Pas un plan de fabrication ou une validation scientifique.</strong></p><small>Snapshot autonome. Aucune execution Python, synchronisation, compte cloud ou contenu prive additionnel n\u2019est charge par ce document.</small></html>';
-   download(store.client.id+'-snapshot.html',html,'text/html');setMessage('Rapport statique autonome exporte.');}
+   download(store.client.id+'-snapshot.html',html,'text/html');recordExport('html-report');setMessage('Rapport statique autonome exporte.');}
  return h(Modal,{title:'Exporter la r\u00e9vision '+s.revision,onClose},h('p',null,'Les exports capturent cet \u00e9tat. Ils ne d\u00e9clenchent aucune publication cloud.'),
-  h('div',{className:'export-grid'},h(Button,{icon:'save',onClick:()=>{download(store.client.id+'.studio.json',JSON.stringify(store.document(),null,2));setMessage('Espace de travail exporte.');}},'Espace de travail JSON'),
+  h('div',{className:'export-grid'},h(Button,{icon:'save',onClick:()=>{download(store.client.id+'.studio.json',JSON.stringify(store.document(),null,2));recordExport('workspace');setMessage('Espace de travail exporte.');}},'Espace de travail JSON'),
+   h(Button,{icon:'code',onClick:appManifest},'Manifeste app JSON'),h(Button,{icon:'folder',onClick:sessionTrace},'Trace de session'),
    h(Button,{icon:'cube',disabled:!sceneApi.current,onClick:()=>{const a=document.createElement('a');a.href=sceneApi.current.capture();a.download=store.client.id+'-3d.png';a.click();setMessage('Capture 3D exportee.');}},'Capture 3D PNG'),
    ...['front','side','top'].map(p=>h(Button,{key:p,icon:'layers',onClick:()=>svg(p)},'SVG '+({front:'face',side:'profil',top:'dessus'})[p])),
    h(Button,{icon:'folder',onClick:report},'Rapport HTML'),h(Button,{icon:'code',onClick:evidence},'Evidence pour adaptateur')),
@@ -57,8 +61,19 @@ function Explanation({store,playback}){const [step,setStep]=useState(0),steps=st
 }
 function Workspace({client,allClients,onClientChange,workspaceStore}){
  const store=workspaceStore,playback=useMemo(()=>new PlaybackStore(),[client]),s=useWorkspace(store);
- const [exportOpen,setExportOpen]=useState(false),[importPreview,setImportPreview]=useState(null),[bottomTab,setBottomTab]=useState('traces'),[apiStatus,setApiStatus]=useState('unknown'),sceneApi=useRef(null),fileInput=useRef(null),request=useRef(new LatestRequest()),cameraSync=useMemo(()=>CameraChannel(),[client]);
+ const [exportOpen,setExportOpen]=useState(false),[importPreview,setImportPreview]=useState(null),[bottomTab,setBottomTab]=useState('traces'),[apiStatus,setApiStatus]=useState('unknown'),sceneApi=useRef(null),fileInput=useRef(null),request=useRef(new LatestRequest()),cameraSync=useMemo(()=>CameraChannel(),[client]),trace=useMemo(()=>new SessionTrace(),[client]),traceStartedAt=useMemo(()=>Date.now(),[client]);
  usePersistence(store);
+ useEffect(()=>{let previous=store.getSnapshot();return store.subscribe(()=>{const next=store.getSnapshot();
+   if(next.revision!==previous.revision)trace.record(next.scenarioId!==previous.scenarioId?'scenario':'parameter',next.scenarioId!==previous.scenarioId?'change':'revision',{inputRevision:next.revision,meta:{scenario:next.scenarioId}});
+   if(next.selection!==previous.selection)trace.record('selection',next.selection?'select':'clear',{entityId:next.selection,inputRevision:next.revision});
+   if(next.hidden!==previous.hidden&&canonical(next.hidden)!==canonical(previous.hidden))trace.record('visibility','change',{inputRevision:next.revision,meta:{hiddenCount:next.hidden.length}});
+   if(next.view.mode!==previous.view.mode||next.view.camera!==previous.view.camera)trace.record('view','change',{inputRevision:next.revision,meta:{mode:next.view.mode,camera:next.view.camera}});
+   previous=next;});},[store,trace]);
+ useEffect(()=>{let previous=playback.getSnapshot();return playback.subscribe(()=>{const next=playback.getSnapshot();
+   if(next.playing!==previous.playing)trace.record('playback',next.playing?'play':'pause',{phase:next.phase});
+   else if(!next.playing&&Math.abs(next.phase-previous.phase)>.005)trace.record('playback','seek',{phase:next.phase});
+   if(next.speed!==previous.speed)trace.record('playback','speed',{phase:next.phase,meta:{speed:next.speed}});
+   previous=next;});},[playback,trace]);
  useEffect(()=>{const q=matchMedia('(prefers-reduced-motion: reduce)'),pref=()=>playback.set({reducedMotion:q.matches}),visibility=()=>{if(document.hidden)playback.set({playing:false});};pref();q.addEventListener('change',pref);document.addEventListener('visibilitychange',visibility);
    return()=>{q.removeEventListener('change',pref);document.removeEventListener('visibilitychange',visibility);playback.dispose();request.current.cancel();};},[playback]);
  useEffect(()=>playback.set({period:(client.period?.(s.parameters)||2.5)}),[s.parameters,playback]);
@@ -66,7 +81,7 @@ function Workspace({client,allClients,onClientChange,workspaceStore}){
  useEffect(()=>{const handler=e=>{if(e.target instanceof HTMLInputElement||e.target instanceof HTMLTextAreaElement)return;
    if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?store.redo():store.undo();}
    if(e.key==='Escape')store.select(null);};document.addEventListener('keydown',handler);return()=>document.removeEventListener('keydown',handler);},[store]);
- async function evaluate(){if(globalThis.__STUDIO_BOOT__?.offline){store.setError('Export autonome: demarrez le serveur local pour utiliser Python.');return;}const req=store.requestEvaluation();try{const result=await request.current.run(async signal=>{const r=await fetch('./api/v1/evaluate',{method:'POST',headers:{'Content-Type':'application/json','X-Studio-Request':'1'},body:JSON.stringify(req),signal});const data=await r.json().catch(()=>null);if(!r.ok)throw new Error(data?.detail||'Pont Python indisponible.');return data;});if(result.current)store.acceptEvaluation(result.value,req);}catch(e){if(e.name!=='AbortError')store.failEvaluation(e.message);} }
+ async function evaluate(){if(globalThis.__STUDIO_BOOT__?.offline){store.setError('Export autonome: demarrez le serveur local pour utiliser Python.');return;}const req=store.requestEvaluation();trace.record('task','evaluate-start',{inputRevision:req.inputRevision});try{const result=await request.current.run(async signal=>{const r=await fetch('./api/v1/evaluate',{method:'POST',headers:{'Content-Type':'application/json','X-Studio-Request':'1'},body:JSON.stringify(req),signal});const data=await r.json().catch(()=>null);if(!r.ok)throw new Error(data?.detail||'Pont Python indisponible.');return data;});if(result.current){const accepted=store.acceptEvaluation(result.value,req);trace.record('task',accepted?'evaluate-ready':'evaluate-stale',{inputRevision:req.inputRevision});}}catch(e){if(e.name!=='AbortError'){store.failEvaluation(e.message);trace.record('task','evaluate-error',{inputRevision:req.inputRevision});}} }
  async function importFile(e){try{const file=e.target.files?.[0];if(!file)return;if(file.size>1024*1024)throw new Error('Document limite a 1 Mio.');const doc=boundedJson(await file.text());validateDocument(client,doc);setImportPreview(doc);}catch(err){store.setError(err.message);}finally{e.target.value='';}}
  const metrics=s.evaluationStatus==='ready'&&s.evaluation?.metrics?s.evaluation.metrics:client.metrics(s.parameters,{scenarioId:s.scenarioId});
  const mode=s.view.mode;
@@ -99,10 +114,10 @@ function Workspace({client,allClients,onClientChange,workspaceStore}){
    h(Explanation,{store,playback}),
    h('footer',{className:'workspace-footer'},h('div',null,h('i',{className:'status-dot '+s.evaluationStatus}),h('span',null,STATUS[s.evaluationStatus])),h('span',{className:'footer-warning'},'Visualisation \u2260 validation scientifique'),h(Button,{icon:'play',disabled:s.evaluationStatus==='running',onClick:evaluate,className:'compact'},'Calculer avec Python')),
    h('input',{type:'file',ref:fileInput,accept:'.json,application/json',style:{display:'none'},onChange:importFile,'aria-label':'Importer un espace de travail JSON'}),
-   exportOpen&&h(ExportDialog,{store,playback,sceneApi,onClose:()=>setExportOpen(false)}),
+   exportOpen&&h(ExportDialog,{store,playback,sceneApi,trace,traceStartedAt,onClose:()=>setExportOpen(false)}),
    importPreview&&h(Modal,{title:'V\u00e9rifier l\u2019import',onClose:()=>setImportPreview(null)},h('p',null,'Le document est compatible. Appliquer remplacera les parametres et la vue de cette session; la reference demeure intacte.'),
     h('div',{className:'import-diff'},...client.parameters.filter(f=>importPreview.parameters[f.id]!==s.parameters[f.id]).map(f=>h('div',{key:f.id},h('span',null,f.label),h('code',null,s.parameters[f.id]+' \u2192 '+importPreview.parameters[f.id])))),
-    h(Button,{className:'primary',onClick:()=>{const reviewed=importPreview;setImportPreview(null);setTimeout(()=>store.importDocument(reviewed),0);}},'Appliquer le document')))));
+    h(Button,{className:'primary',onClick:()=>{const reviewed=importPreview;setImportPreview(null);trace.record('import','reviewed-apply',{inputRevision:s.revision});setTimeout(()=>store.importDocument(reviewed),0);}},'Appliquer le document')))));
 }
 export function App({clients,initialClient,offline=false}){const [clientId,setClientId]=useState(initialClient||clients[0].id),client=clients.find(c=>c.id===clientId)||clients[0],stores=useRef(new Map());
  if(!stores.current.has(client.id))stores.current.set(client.id,new WorkspaceStore(client));
