@@ -1,0 +1,10 @@
+const ALLOWED=new Set(['parameter','scenario','selection','visibility','view','playback','task','artifact','import','export','custom']);
+function cleanMeta(meta){if(meta==null)return undefined;if(typeof meta!=='object'||Array.isArray(meta))throw new Error('Trace metadata must be an object');const out={};for(const [k,v] of Object.entries(meta)){if(!/^[a-zA-Z][a-zA-Z0-9_.-]{0,63}$/.test(k))throw new Error('Invalid trace metadata key');if(['string','number','boolean'].includes(typeof v)&&!(typeof v==='number'&&!Number.isFinite(v)))out[k]=v;else if(v===null)out[k]=null;else throw new Error('Trace metadata must be scalar');}return out;}
+export class SessionTrace {
+  #events=[];#seq=0;#clock;#max;
+  constructor({clock=()=>Date.now(),maxEvents=1000}={}){if(!Number.isSafeInteger(maxEvents)||maxEvents<1||maxEvents>10000)throw new Error('Invalid trace bound');this.#clock=clock;this.#max=maxEvents;}
+  record(type,action,{entityId=null,inputRevision=null,phase=null,meta}={}){if(!ALLOWED.has(type)||typeof action!=='string'||!action||action.length>160)throw new Error('Invalid trace event');if(entityId!==null&&(typeof entityId!=='string'||entityId.length>160))throw new Error('Invalid entity id');if(inputRevision!==null&&(!Number.isSafeInteger(inputRevision)||inputRevision<0))throw new Error('Invalid revision');if(phase!==null&&(typeof phase!=='number'||!Number.isFinite(phase)||phase<0||phase>1))throw new Error('Invalid phase');const event=Object.freeze({seq:++this.#seq,at:this.#clock(),type,action,entityId,inputRevision,phase,meta:cleanMeta(meta)});this.#events.push(event);if(this.#events.length>this.#max)this.#events.splice(0,this.#events.length-this.#max);return event;}
+  events(){return this.#events.map(x=>({...x,meta:x.meta?{...x.meta}:undefined}));}
+  export({clientId,clientVersion,startedAt=null}={}){if(typeof clientId!=='string'||typeof clientVersion!=='string')throw new Error('Trace export requires client identity');return {format:'datapass.studio.trace',version:1,clientId,clientVersion,startedAt,exportedAt:this.#clock(),events:this.events()};}
+  clear(){this.#events=[];}
+}
