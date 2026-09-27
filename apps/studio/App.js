@@ -88,7 +88,7 @@ function DataDashboard({store,playback}){
 }
 function Workspace({client,allClients,onClientChange,workspaceStore}){
  const store=workspaceStore,playback=useMemo(()=>new PlaybackStore(),[client]),s=useWorkspace(store);
- const [exportOpen,setExportOpen]=useState(false),[importPreview,setImportPreview]=useState(null),[bottomTab,setBottomTab]=useState('traces'),[apiStatus,setApiStatus]=useState('unknown'),sceneApi=useRef(null),fileInput=useRef(null),request=useRef(new LatestRequest()),cameraSync=useMemo(()=>CameraChannel(),[client]),trace=useMemo(()=>new SessionTrace(),[client]),traceStartedAt=useMemo(()=>Date.now(),[client]);
+ const [exportOpen,setExportOpen]=useState(false),[importPreview,setImportPreview]=useState(null),[importApplying,setImportApplying]=useState(false),[bottomTab,setBottomTab]=useState('traces'),[apiStatus,setApiStatus]=useState('unknown'),sceneApi=useRef(null),fileInput=useRef(null),request=useRef(new LatestRequest()),cameraSync=useMemo(()=>CameraChannel(),[client]),trace=useMemo(()=>new SessionTrace(),[client]),traceStartedAt=useMemo(()=>Date.now(),[client]);
  usePersistence(store);
  useEffect(()=>{let previous=store.getSnapshot();return store.subscribe(()=>{const next=store.getSnapshot();
    if(next.revision!==previous.revision)trace.record(next.scenarioId!==previous.scenarioId?'scenario':'parameter',next.scenarioId!==previous.scenarioId?'change':'revision',{inputRevision:next.revision,meta:{scenario:next.scenarioId}});
@@ -101,6 +101,7 @@ function Workspace({client,allClients,onClientChange,workspaceStore}){
    else if(!next.playing&&Math.abs(next.phase-previous.phase)>.005)trace.record('playback','seek',{phase:next.phase});
    if(next.speed!==previous.speed)trace.record('playback','speed',{phase:next.phase,meta:{speed:next.speed}});
    previous=next;});},[playback,trace]);
+ useEffect(()=>{if(!importApplying||!importPreview)return;const reviewed=importPreview,inputRevision=store.getSnapshot().revision,timer=setTimeout(()=>{try{store.importDocument(reviewed);trace.record('import','reviewed-apply',{inputRevision});}catch(error){store.setError('Import valide mais non applicable: '+String(error?.message||error));}finally{setImportPreview(null);setImportApplying(false);}},0);return()=>clearTimeout(timer);},[importApplying,importPreview,store,trace]);
  useEffect(()=>{const q=matchMedia('(prefers-reduced-motion: reduce)'),pref=()=>playback.set({reducedMotion:q.matches}),visibility=()=>{if(document.hidden)playback.set({playing:false});};pref();q.addEventListener('change',pref);document.addEventListener('visibilitychange',visibility);
    return()=>{q.removeEventListener('change',pref);document.removeEventListener('visibilitychange',visibility);playback.dispose();request.current.cancel();};},[playback]);
  useEffect(()=>playback.set({period:(client.period?.(s.parameters)||2.5)}),[s.parameters,playback]);
@@ -145,7 +146,7 @@ function Workspace({client,allClients,onClientChange,workspaceStore}){
    exportOpen&&h(ExportDialog,{store,playback,sceneApi,trace,traceStartedAt,onClose:()=>setExportOpen(false)}),
    importPreview&&h(Modal,{title:'V\u00e9rifier l\u2019import',onClose:()=>setImportPreview(null)},h('p',null,'Le document est compatible. Appliquer remplacera les parametres et la vue de cette session; la reference demeure intacte.'),
     h('div',{className:'import-diff'},...client.parameters.filter(f=>importPreview.parameters[f.id]!==s.parameters[f.id]).map(f=>h('div',{key:f.id},h('span',null,f.label),h('code',null,s.parameters[f.id]+' \u2192 '+importPreview.parameters[f.id])))),
-    h(Button,{className:'primary',onClick:()=>{const reviewed=importPreview,inputRevision=s.revision;setImportPreview(null);setTimeout(()=>{try{store.importDocument(reviewed);trace.record('import','reviewed-apply',{inputRevision});}catch(error){store.setError('Import valide mais non applicable: '+String(error?.message||error));}},0);}},'Appliquer le document')))));
+    h(Button,{className:'primary',disabled:importApplying,onClick:()=>setImportApplying(true)},importApplying?'Application...':'Appliquer le document')))));
 }
 export function App({clients,initialClient,offline=false}){const [clientId,setClientId]=useState(initialClient||clients[0].id),client=clients.find(c=>c.id===clientId)||clients[0],stores=useRef(new Map());
  if(!stores.current.has(client.id))stores.current.set(client.id,new WorkspaceStore(client));
