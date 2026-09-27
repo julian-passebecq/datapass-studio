@@ -18,29 +18,32 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Resolve dependencies (switch to frozen npm ci after reviewed lock is committed)
+      - name: Resolve dependencies (commit the reviewed lock, then use npm ci)
         run: |
           if [ -f package-lock.json ]; then npm ci; else npm install; fi
       - run: npm test
-      - run: node tools/check-boundaries.mjs
-      - run: node tools/export-schemas.mjs --check
+      - run: npm run check
       - run: npm run build
+      - run: node tools/standalone.mjs
       - run: python -m pip install -r requirements-test.txt
       - run: python -m pytest tests/python -q
       - run: python -m playwright install --with-deps chromium
-      - name: Production HTTP integration gate
+      - name: Isolated portable UI gate
+        run: python tests/browser/run.py --html dist/studio-offline.html
+      - name: Production HTTP integration gate (not qualified in the delivery container)
         run: |
-          mkdir -p qa
-          python tools/serve.py --api --directory dist --port 8765 > qa/server.log 2>&1 &
-          python -c "import time, urllib.request; time.sleep(3); assert urllib.request.urlopen('http://127.0.0.1:8765/api/health').status == 200"
+          python tools/serve.py --directory dist --port 8765 > qa/server.log 2>&1 &
+          python -c "import time,urllib.request; time.sleep(3); assert urllib.request.urlopen('http://127.0.0.1:8765/api/health').status==200"
+          python tools/smoke_http.py > qa/http-api-report.json
           python tests/browser/run.py --url http://127.0.0.1:8765
-      - name: Keep public QA and generated dependency lock
+      - name: Preserve public QA and resolved lock
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: studio-public-gate
           path: |
             qa/browser-report.json
+            qa/http-api-report.json
             qa/screenshots/public-*.png
             qa/server.log
             package-lock.json

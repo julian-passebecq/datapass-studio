@@ -1,0 +1,12 @@
+{
+  "packageSha256": "0a69e666101921c38c59b6aa275deb27ac849cb5f01803b881cf4c8c06680296",
+  "manifestSha256": "9d7a19e169afbb8b61eef08c576916fc2f86206129799b781adcba2f4d4c355d",
+  "kernelSha256": "eebe3fdd052a1fe68c93b870e0e0073a6eb647828f8297c979855f75e0048d5f",
+  "files": {
+    "windlab/__init__.py": "236e38d8a6cba802d68deb423c1affc6dbc254104f8adb4ca02171d2b904a781",
+    "windlab/reference.py": "51b9ccbce4c2d94aa5decc0cec5a8465cc7bc29552f2c0e9be86e889f90cb2de",
+    "windlab/candidate.py": "b8023bc5b46d8749625e2c0cc2b668beab3ca260497a78a3cb149de95d0857d1",
+    "web/src/geometry.js": "e10375dae61bb0d5a07ea97f10035f0babd48e6f9ee27644647c9cf46151871f",
+    "web/src/kernel.js": "e27049a5c7c4a6da04778b674d69001387308eafbf6b6303d70314bc1a2c47be"
+  }
+}

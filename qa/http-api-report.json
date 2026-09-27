@@ -1,0 +1,15 @@
+{
+  "mode": "live-loopback-http-no-browser",
+  "passed": 5,
+  "checks": [
+    "Live health endpoint and explicit registered clients",
+    "Production app is served with security headers",
+    "Actual registered Python computation, revision correlation and provenance",
+    "Browser-write header is enforced over HTTP",
+    "Cross-origin writes are refused over HTTP"
+  ],
+  "registeredClients": [
+    "motion-rig",
+    "transfer-bench"
+  ]
+}

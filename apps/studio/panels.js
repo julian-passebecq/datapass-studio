@@ -1,0 +1,37 @@
+import React,{useState,useEffect,useMemo} from 'react';
+import {h,useWorkspace,usePlayback,Icon,IconButton,Button,Badge,Panel} from '../../packages/react/components.js';
+export function Assembly({store}){const s=useWorkspace(store),[query,setQuery]=useState('');const parts=store.client.frame(s.parameters,0,{yaw:0,explode:0,scenarioId:s.scenarioId}).parts;
+ const groups=[...new Set(parts.map(p=>p.group))];return h('aside',{className:'assembly'},h('div',{className:'assembly-heading'},h(Icon,{name:'layers',size:17}),h('strong',null,'Assemblage'),h('span',{className:'count'},parts.length)),
+  h('input',{className:'search',type:'search',placeholder:'Rechercher une pi\u00e8ce','aria-label':'Rechercher une piece',value:query,onChange:e=>setQuery(e.target.value)}),
+  ...groups.map(g=>h('div',{className:'assembly-group',key:g},h('h3',null,g),...parts.filter(p=>p.group===g&&p.label.toLowerCase().includes(query.toLowerCase())).map(p=>h('div',{className:'part-row '+(s.selection===p.id?'selected':''),key:p.id},
+   h('button',{className:'part-select','data-select-part':p.id,'aria-pressed':s.selection===p.id,onClick:()=>store.select(s.selection===p.id?null:p.id)},h('span',{className:'part-swatch',style:{background:`rgb(${p.color.map(c=>Math.round(c*255)).join(',')})`}}),h('span',null,p.label)),
+   h(IconButton,{icon:'eye',label:(s.hidden.includes(p.id)?'Afficher ':'Masquer ')+p.label,'aria-pressed':!s.hidden.includes(p.id),className:s.hidden.includes(p.id)?'muted':'',onClick:()=>store.toggleHidden(p.id)}))))),
+  h('div',{className:'assembly-foot'},h('span',{className:'label-small'},'IDENTIT\u00c9 PARTAG\u00c9E'),h('p',null,'La m\u00eame pi\u00e8ce dans chaque vue.'),h(Button,{onClick:()=>store.showAll(),className:'subtle'},'Tout afficher')));
+}
+function Parameter({field,store,selected=false}){
+ const s=useWorkspace(store),value=s.parameters[field.id],[text,setText]=useState(String(value));useEffect(()=>setText(String(value)),[value]);
+ function commit(){if(text.trim()===''||!Number.isFinite(Number(text))){setText(String(value));store.setError(field.label+': nombre fini requis.');return;}if(!store.updateParameter(field.id,Number(text)))setText(String(value));}
+ return h('div',{className:'parameter '+(selected?'bound':''),'data-field':field.id},
+  h('label',{htmlFor:'range-'+field.id},field.label,h('span',{className:'unit'},field.unit)),
+  h('div',{className:'parameter-inputs'},h('input',{id:'range-'+field.id,type:'range',min:field.min,max:field.max,step:field.step,value,
+    onPointerDown:()=>store.beginEdit(),onPointerUp:()=>store.endEdit(),onKeyDown:()=>store.beginEdit(),onKeyUp:()=>store.endEdit(),onBlur:()=>store.endEdit(),
+    onChange:e=>store.updateParameter(field.id,Number(e.target.value),{grouped:true})}),
+   h('input',{type:'number',min:field.min,max:field.max,step:field.step,value:text,'aria-label':field.label+' valeur',onChange:e=>setText(e.target.value),onBlur:commit,onKeyDown:e=>{if(e.key==='Enter'){commit();e.currentTarget.blur();}if(e.key==='Escape')setText(String(value));}})),
+  field.note&&h('div',{className:'parameter-note'},field.note));
+}
+export function Inspector({store}){const s=useWorkspace(store),[tab,setTab]=useState('parameters'),[onlyBound,setOnlyBound]=useState(false);
+ const part=store.client.frame(s.parameters,0,{yaw:0,explode:0,scenarioId:s.scenarioId}).parts.find(p=>p.id===s.selection),groups=[...new Set(store.client.parameters.map(p=>p.group))];
+ return h('aside',{className:'inspector'},h('div',{className:'inspector-tabs'},...['parameters','selection','journal'].map((v,i)=>h('button',{key:v,onClick:()=>setTab(v),className:tab===v?'active':'','aria-pressed':tab===v},['Param\u00e8tres','Pi\u00e8ce','Journal'][i]))),
+  tab==='parameters'?h('div',{className:'inspector-content'},h('div',{className:'inspector-intro'},h('h2',null,'Ajuster le mod\u00e8le'),h('p',null,'Aper\u00e7u local. Les r\u00e9sultats serveur restent li\u00e9s \u00e0 leur r\u00e9vision.')),
+   part&&h('button',{className:'selection-filter '+(onlyBound?'active':''),onClick:()=>setOnlyBound(!onlyBound),'aria-pressed':onlyBound},h(Icon,{name:'sliders',size:14}),onlyBound?'Voir tous les param\u00e8tres':'Li\u00e9s \u00e0 '+part.label),
+   ...groups.map(g=>h('section',{className:'parameter-group',key:g},h('h3',null,g),...store.client.parameters.filter(f=>f.group===g&&(!onlyBound||!part||part.parameterIds.includes(f.id))).map(f=>h(Parameter,{key:f.id,field:f,store,selected:part?.parameterIds.includes(f.id)})))),
+   h(Button,{icon:'refresh',onClick:()=>store.reset(),className:'wide subtle'},'R\u00e9tablir la r\u00e9f\u00e9rence')):
+  tab==='selection'?h('div',{className:'inspector-content'},part?h(React.Fragment,null,h('h2',null,part.label),h(Badge,null,part.source),h('dl',null,h('dt',null,'Identifiant stable'),h('dd',{className:'mono'},part.id),h('dt',null,'Groupe'),h('dd',null,part.group),h('dt',null,'Triangles'),h('dd',null,(part.positions.length/9).toLocaleString('fr-FR')),h('dt',null,'Param\u00e8tres associ\u00e9s'),h('dd',null,part.parameterIds.join(', ')||'Aucun parametre direct')),
+   h(Button,{onClick:()=>{store.setView({ghost:!s.view.ghost});}},s.view.ghost?'Rendre les autres opaques':'Isoler visuellement'),h('p',{className:'muted-note'},'Une enveloppe visible n\u2019est pas une pi\u00e8ce valid\u00e9e.')):h('div',{className:'empty-selection'},h(Icon,{name:'cube',size:36}),h('p',null,'S\u00e9lectionnez une pi\u00e8ce en 3D, dans un plan ou dans la liste.'))):
+  h('div',{className:'inspector-content'},h('h2',null,'Journal de la session'),h('p',{className:'muted-note'},'Actions locales, pas une preuve d\u2019ex\u00e9cution scientifique.'),...s.eventLog.slice().reverse().map(e=>h('div',{className:'event',key:e.seq},h('span',{className:'mono'},String(e.seq).padStart(2,'0')),h('div',null,h('strong',null,e.type),h('small',null,String(e.detail)))))),
+  h('div',{className:'inspector-footer'},h(Icon,{name:'info',size:14}),h('span',null,store.client.classification==='private'?'Client priv\u00e9 \u00b7 donn\u00e9es locales':'Client synth\u00e9tique \u00b7 aucun r\u00e9sultat industriel')));
+}
+export function PartsTable({store,playback}){const s=useWorkspace(store),t=usePlayback(playback,12),parts=store.client.frame(s.parameters,t.phase,{...s.view,scenarioId:s.scenarioId}).parts;
+ return h('div',{className:'parts-table-wrap'},h('table',{className:'parts-table'},h('caption',null,'Nomenclature visuelle \u00b7 cliquez pour synchroniser la s\u00e9lection'),h('thead',null,h('tr',null,h('th',null,'Pi\u00e8ce'),h('th',null,'Identifiant'),h('th',null,'Position Z'),h('th',null,'Source'))),h('tbody',null,...parts.map(p=>h('tr',{key:p.id,className:s.selection===p.id?'selected':''},h('td',null,h('button',{onClick:()=>store.select(p.id)},p.label)),h('td',{className:'mono'},p.id),h('td',{className:'mono'},p.matrix[14].toFixed(2)+' m'),h('td',null,p.source))))));
+}
+export function SelectionBar({store}){const s=useWorkspace(store),part=store.client.frame(s.parameters,0,{yaw:0,explode:0,scenarioId:s.scenarioId}).parts.find(p=>p.id===s.selection);return h('div',{className:'selection-bar'},h(Icon,{name:'cube',size:15}),h('span',null,part?part.label:'Aucune pi\u00e8ce s\u00e9lectionn\u00e9e'),part&&h('code',null,part.id),h('span',{className:'spacer'}),h('span',null,'Unit\u00e9s : m'),h('span',{className:'separator'}),h('span',null,'Rev. '+String(s.revision).padStart(3,'0')));}

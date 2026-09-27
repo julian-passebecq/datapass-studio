@@ -1,0 +1,17 @@
+{
+  "name": "datapass-studio", "version": "0.1.0", "private": true,
+  "type": "module", "license": "MIT", "engines": {"node": ">=22.12.0"},
+  "scripts": {
+    "dev": "python tools/serve.py --api",
+    "build": "node tools/build.mjs",
+    "build:portable": "node tools/build.mjs --portable",
+    "test": "node --test tests/*.test.mjs",
+    "check": "node tools/check.mjs",
+    "test:python": "python -m pytest tests/python -q",
+    "test:browser": "python tests/browser/run.py",
+    "gate": "npm test && npm run check && npm run build"
+  },
+  "dependencies": {"react": "18.2.0", "react-dom": "18.2.0"},
+  "optionalDependencies": {"three": "0.160.1"},
+  "description": "A host-neutral interactive scientific app workbench. Clients own the domain; Studio owns composition and interaction."
+}
