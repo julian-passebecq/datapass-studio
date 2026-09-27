@@ -10,15 +10,53 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "title", "mime", "sourceKind"],
+        "required": [
+          "id",
+          "title",
+          "mime",
+          "sourceKind"
+        ],
         "properties": {
-          "id": {"type": "string", "pattern": "^[a-z][a-z0-9_.-]{1,79}$"},
-          "title": {"type": "string", "minLength": 1, "maxLength": 300},
-          "mime": {"enum": ["application/pdf", "image/png", "image/jpeg", "image/webp", "text/plain", "text/markdown"]},
-          "sourceKind": {"enum": ["synthetic", "private-reference", "user-reference", "derived"]},
-          "url": {"type": "string", "maxLength": 2048},
-          "pages": {"type": "integer", "minimum": 1, "maximum": 10000},
-          "sourceLabel": {"type": "string", "maxLength": 1000}
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_.-]{1,79}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "mime": {
+            "enum": [
+              "application/pdf",
+              "image/png",
+              "image/jpeg",
+              "image/webp",
+              "text/plain",
+              "text/markdown"
+            ]
+          },
+          "sourceKind": {
+            "enum": [
+              "synthetic",
+              "private-reference",
+              "user-reference",
+              "derived"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "pages": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "sourceLabel": {
+            "type": "string",
+            "maxLength": 1000
+          }
         }
       }
     },
@@ -28,22 +66,98 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "title", "kind", "entityIds"],
+        "required": [
+          "id",
+          "title",
+          "kind",
+          "entityIds"
+        ],
         "properties": {
-          "id": {"type": "string", "pattern": "^[a-z][a-z0-9_.-]{1,79}$"},
-          "title": {"type": "string", "minLength": 1, "maxLength": 300},
-          "kind": {"enum": ["figure", "document-region", "image", "code", "table"]},
-          "entityIds": {"type": "array", "minItems": 1, "maxItems": 50, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-          "documentId": {"type": "string"},
-          "page": {"type": "integer", "minimum": 1, "maximum": 10000},
-          "summary": {"type": "string", "maxLength": 4000},
-          "sourceKind": {"enum": ["synthetic", "private-reference", "user-reference", "derived"]},
-          "phase": {"type": "number", "minimum": 0, "maximum": 1},
-          "region": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "number", "minimum": 0, "maximum": 1}},
-          "preview": {"type": "object", "additionalProperties": false, "required": ["plane"], "properties": {"plane": {"enum": ["front", "side", "top"]}}}
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_.-]{1,79}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "kind": {
+            "enum": [
+              "figure",
+              "document-region",
+              "image",
+              "code",
+              "table"
+            ]
+          },
+          "entityIds": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "documentId": {
+            "type": "string"
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "sourceKind": {
+            "enum": [
+              "synthetic",
+              "private-reference",
+              "user-reference",
+              "derived"
+            ]
+          },
+          "phase": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "region": {
+            "type": "array",
+            "minItems": 4,
+            "maxItems": 4,
+            "items": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "preview": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "plane"
+            ],
+            "properties": {
+              "plane": {
+                "enum": [
+                  "front",
+                  "side",
+                  "top"
+                ]
+              }
+            }
+          }
         }
       }
     }
   },
-  "required": ["documents", "artifacts"]
+  "required": [
+    "documents",
+    "artifacts"
+  ]
 }
