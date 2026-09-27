@@ -141,7 +141,7 @@ def main():
         def import_valid():
             payload=export_payload('Espace de travail JSON');d=json.loads(payload['text']);d['parameters'][field]=initial;d['view']['mode']='lab'
             page.locator('input[type=file]').set_input_files({'name':'valid.json','mimeType':'application/json','buffer':json.dumps(d).encode()})
-            dialog=page.get_by_role('dialog');dialog.get_by_role('button',name='Appliquer le document').click(force=True,timeout=3000);expect(dialog).not_to_be_visible(timeout=3000);assert_true(number().input_value()==str(initial))
+            dialog=page.get_by_role('dialog');dialog.get_by_role('button',name='Appliquer le document').click(timeout=3000);expect(dialog).not_to_be_visible(timeout=3000);expect(number()).to_have_value(str(initial),timeout=5000)
         check('valid import requires review before application',import_valid)
         def python_mode():
             page.get_by_role('button',name='Calculer avec Python').click()
