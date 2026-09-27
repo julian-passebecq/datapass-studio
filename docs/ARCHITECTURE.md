@@ -10,6 +10,9 @@ Studio 0.1 is a visual-lab framework extracted through working clients, not an a
 |---|---|---|
 | Client source | Parameter schema, domain validation, scene entities, prescribed pose, metrics/trace presentation, scenario references | Studio storage or other client domains |
 | WorkspaceStore | Parameters, selected entity, visibility, view settings, bounded parameter/scenario history, input revision, evaluator status | GPU buffers, animation clock, scientific authority |
+| ReactiveGraph | Explicit client-owned source/computed dependency DAG for local derivation | Imported expressions, persistence, task execution, scientific authority |
+| TaskCoordinator | Trusted async handler lifecycle, cancellation, progress, revision freshness and bounded run history | Arbitrary code from manifests, worker isolation, cloud scheduling |
+| SessionTrace | Bounded semantic interaction/task/export events with scalar metadata | Hidden telemetry, parameter payloads, document bytes |
 | PlaybackStore | Phase, speed, period, reduced-motion policy | Persistent document revision or Python calls |
 | Renderer adapter | Mount/update/destroy, draw resources, picking, viewport camera, capture | Domain computation, durable storage |
 | Python registry | Trusted bounded evaluators, server validation, authoritative calculation results | Arbitrary client code from JSON, untrusted plugin installation |
@@ -27,6 +30,18 @@ The scene contract answers **what is being visualized**. The artifact catalog an
 This is intentionally not a PDF extraction engine. There is no OCR, automatic figure detection, coordinate inference or trust promotion. A region is useful only when a client/user workflow knows the coordinate convention. A future extractor can produce reviewed artifact patches without changing scene identity or the runtime format.
 
 Evidence export may include an `artifactBindings` projection containing artifact/document ids, page, source kind and linked entity ids. It never includes session object URLs. DiagramCloud still needs an explicit reviewed adapter; Studio does not write DiagramCloud documents directly.
+
+## Declarative app contract
+
+The `datapass.studio.app/1` manifest is an inert projection used for authoring, review and future scaffolding. It may describe parameters, views, task inputs/outputs and artifact bindings, but it never contains callbacks, formulas, React components or code to execute. JS `manifestFromClient()` and the Python authoring helper produce the same shape. Runtime client functions remain trusted source registrations.
+
+## Reactive derivation and tasks
+
+`ReactiveGraph` is a small DOM-free dependency DAG for browser-local derived values. Invalidating a source marks only descendants dirty; computed nodes are pulled on demand. Batches emit once. It is intentionally explicit rather than a whole-script rerun engine.
+
+`TaskCoordinator` is the complementary async primitive. Handlers are registered in trusted source, keyed runs supersede earlier work, progress is bounded, and a result can be marked stale when the input revision has moved. It does not itself provide process isolation, a Python worker pool or network authentication.
+
+`SessionTrace` records bounded semantic events for user-requested export/support/explanation. Studio's integration records selection/view/playback/task/import/export semantics and does not record parameter values or local document bytes.
 
 ## State and revisions
 
