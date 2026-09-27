@@ -114,6 +114,8 @@ def main():
             mode('Références');expect(page.locator('.reference-layout')).to_be_visible();cards=page.locator('.artifact-card');assert_true(cards.count()>0)
             cards.first.click();expect(page.locator('[data-testid="artifact-document"]')).to_be_visible();assert_true(page.locator('.artifact-preview .plan-svg').count()==1)
             assert_true(page.locator('.artifact-inspector .entity-link[aria-pressed="true"]').count()>=1)
+            png=bytes.fromhex('89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d49444154789c63606060f80f0001040100b51c0c020000000049454e44ae426082')
+            page.get_by_label('Ouvrir une source locale pour ce document').set_input_files({'name':'local-reference.png','mimeType':'image/png','buffer':png});expect(page.locator('.document-image')).to_be_visible();expect(page.locator('.session-source-note')).to_contain_text('non sauvegardee')
         check('artifact workspace binds document reference, model entity and plan preview',references)
         def evidence_binding():
             payload=export_payload('Evidence pour adaptateur');d=json.loads(payload['text']);assert_true(len(d.get('artifactBindings',[]))>=1);assert_true(d['artifactBindings'][0]['entityIds']);assert_true('url' not in json.dumps(d['artifactBindings']))
