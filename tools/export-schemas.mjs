@@ -3,7 +3,7 @@ import {publicClients} from '../clients/index.js';
 import {manifestFromClient} from '../packages/runtime/app-spec.js';
 
 const viewSchema={type:'object',required:['mode','camera','yaw','explode','edges','ghost','grid'],additionalProperties:false,properties:{
-  mode:{enum:['lab','plans','compare','references','explain']},
+  mode:{enum:['lab','plans','compare','references','data','explain']},
   camera:{enum:['iso','front','side','top']},
   yaw:{type:'number',minimum:-180,maximum:180},
   explode:{type:'number',minimum:0,maximum:1},
@@ -54,7 +54,7 @@ const appSchema={
     }}},
     views:{type:'array',minItems:1,maxItems:100,items:{type:'object',additionalProperties:false,required:['id','label','kind','icon','description'],properties:{
       id:{type:'string',pattern:idPattern},label:{type:'string',minLength:1,maxLength:160},
-      kind:{enum:['lab','plans','compare','references','explain','custom']},icon:{type:'string',maxLength:120},description:{type:'string',maxLength:4000}
+      kind:{enum:['lab','plans','compare','references','data','explain','custom']},icon:{type:'string',maxLength:120},description:{type:'string',maxLength:4000}
     }}},
     tasks:{type:'array',maxItems:200,items:{type:'object',additionalProperties:false,required:['id','label','input_nodes','output_nodes','revision_guarded','cancellable'],properties:{
       id:{type:'string',pattern:idPattern},label:{type:'string',minLength:1,maxLength:160},
