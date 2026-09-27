@@ -110,6 +110,11 @@ def main():
             page.mouse.move(r['x']+120,r['y']+130);page.mouse.down();page.mouse.move(r['x']+180,r['y']+155,steps=8);page.mouse.up()
             after=cs.nth(0).evaluate('(c,id)=>c.__sceneApi.screenPoint(id)',piece);assert_true(abs(before[0]-after[0])>2)
         check('comparison shares camera motion but preserves separate parameter sets',compare)
+        def references():
+            mode('Références');expect(page.locator('.reference-layout')).to_be_visible();cards=page.locator('.artifact-card');assert_true(cards.count()>0)
+            cards.first.click();expect(page.locator('[data-testid="artifact-document"]')).to_be_visible();assert_true(page.locator('.artifact-preview .plan-svg').count()==1)
+            assert_true(page.locator('.artifact-inspector .entity-link[aria-pressed="true"]').count()>=1)
+        check('artifact workspace binds document reference, model entity and plan preview',references)
         def explain():
             mode('Expliquer');assert_true(page.locator('.explain-grid').count()==1);assert_true(page.locator('code').count()>0)
         check('display-only explanation mode composes scene and code',explain)
@@ -141,6 +146,11 @@ def main():
             page.get_by_role('combobox',name='Client actif').select_option('transfer-bench');assert_true(page.locator('h1').inner_text()=='Transfer Bench');assert_true(page.locator('canvas[data-triangles]').count()==1)
             page.get_by_role('combobox',name='Client actif').select_option(client);assert_true(number().input_value()==str(changed))
         check('second client uses the same runtime; switching preserves draft state',client_switch)
+        def renderer_recovery():
+            if renderer!='native-webgl': return
+            mode('Laboratoire 3D');canvas=page.locator('canvas[data-renderer="native-webgl"]');canvas.evaluate("c=>c.dispatchEvent(new Event('webglcontextlost',{cancelable:true}))")
+            expect(page.locator('.fallback-notice')).to_be_visible();page.get_by_role('button',name='Reessayer le moteur 3D').click();expect(page.locator('canvas[data-renderer]')).to_be_visible(timeout=10000)
+        check('WebGL loss exposes an explicit fallback and retry path',renderer_recovery)
         page.wait_for_timeout(600);page.screenshot(path=str(qa/'screenshots'/f'{prefix}-lab.png'),full_page=True)
         def reduced():
             page.emulate_media(reduced_motion='reduce');expect(page.get_by_role('button',name='Lire le cycle',exact=True)).to_be_disabled()
