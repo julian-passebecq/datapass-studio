@@ -45,6 +45,7 @@ That optional `portable-vendor` directory is not committed to GitHub.
 - Inert `datapass.studio.app/1` manifest with a matching Python authoring helper; it declares parameters/views/tasks/artifact bindings but never serializes callbacks or formulas.
 - Privacy-bounded `datapass.studio.trace/1` session trace. Studio records semantic interaction/task/export events without parameter values or document bytes, and exports it only on user action.
 - Inert `datapass.studio.layout/1` pane grammar plus React `LayoutHost`: reusable split/grid/tabs/stack composition with bounded validation and trusted slot rendering, without embedding React callbacks in JSON.
+- Renderer-neutral `datapass.studio.chart/1` and `datapass.studio.table/1` contracts with native SVG `ChartView` and sortable `DataGrid`. They create a clean seam for a later genuine D3 sibling renderer without coupling D3 to ConceptMotion.
 - Source-mode IndexedDB storage with optimistic transaction conflict detection and latest-snapshot saves. Offline HTML intentionally uses memory.
 - Local workspace JSON, 3D PNG, vector SVG, static HTML report and evidence JSON exports. Evidence can carry inert artifact/document ids, page/source classification and bound entity ids, never the session-local document URL.
 - Optional private FOIL adapter: **12 parts, nine R0 cases, 34 fields**. The original verified Python kernel remains the authority for its conditional model calculations.
@@ -67,7 +68,7 @@ The separate delivered private workspace is already installed and built; see its
 packages/runtime       contracts, store, playback, reactive DAG, task/trace coordination, validation + registries
 packages/scene         transforms, primitives, picking, projected linework
 packages/renderers     WebGL / CPU Canvas and SVG chart geometry
-packages/react         reusable React view surfaces, artifact/document workspace + generic LayoutHost
+packages/react         reusable React view surfaces, LayoutHost, ChartView/DataGrid + artifact/document workspace
 apps/studio            one reference workbench composition
 clients                independent public domains
 python/datapass_app     trusted local evaluators and optional private connector
