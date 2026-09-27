@@ -35,6 +35,6 @@ export function validateLayoutDocument(value,{knownSlots=null}={}){
 }
 export function collectLayoutSlots(document){validateLayoutDocument(document);const out=[];const visit=node=>{if(node.kind==='slot')out.push(node.slot);else if(node.kind==='split'){visit(node.first);visit(node.second);}else if(node.kind==='tabs')node.tabs.forEach(x=>visit(x.child));else node.children.forEach(visit);};visit(document.root);return out;}
 export function layoutNodeCount(document){validateLayoutDocument(document);let n=0;const visit=x=>{n++;if(x.kind==='split'){visit(x.first);visit(x.second);}else if(x.kind==='tabs')x.tabs.forEach(t=>visit(t.child));else if(x.kind==='grid'||x.kind==='stack')x.children.forEach(visit);};visit(document.root);return n;}
-export function makeSplitLayout(idValue,title,leftSlot,rightSlot,{axis='horizontal',ratio:.35,resizable=true}={}){
+export function makeSplitLayout(idValue,title,leftSlot,rightSlot,{axis='horizontal',ratio=.35,resizable=true}={}){
  const value={format:'datapass.studio.layout',version:1,id:idValue,title,root:{id:'root',kind:'split',axis,ratio,resizable,first:{id:'left',kind:'slot',slot:leftSlot,label:leftSlot},second:{id:'right',kind:'slot',slot:rightSlot,label:rightSlot}}};return validateLayoutDocument(value);
 }
