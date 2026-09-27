@@ -145,7 +145,7 @@ function Workspace({client,allClients,onClientChange,workspaceStore}){
    exportOpen&&h(ExportDialog,{store,playback,sceneApi,trace,traceStartedAt,onClose:()=>setExportOpen(false)}),
    importPreview&&h(Modal,{title:'V\u00e9rifier l\u2019import',onClose:()=>setImportPreview(null)},h('p',null,'Le document est compatible. Appliquer remplacera les parametres et la vue de cette session; la reference demeure intacte.'),
     h('div',{className:'import-diff'},...client.parameters.filter(f=>importPreview.parameters[f.id]!==s.parameters[f.id]).map(f=>h('div',{key:f.id},h('span',null,f.label),h('code',null,s.parameters[f.id]+' \u2192 '+importPreview.parameters[f.id])))),
-    h(Button,{className:'primary',onClick:()=>{const reviewed=importPreview;setImportPreview(null);trace.record('import','reviewed-apply',{inputRevision:s.revision});setTimeout(()=>store.importDocument(reviewed),0);}},'Appliquer le document')))));
+    h(Button,{className:'primary',onClick:()=>{const reviewed=importPreview;trace.record('import','reviewed-apply',{inputRevision:s.revision});store.importDocument(reviewed);setImportPreview(null);}},'Appliquer le document')))));
 }
 export function App({clients,initialClient,offline=false}){const [clientId,setClientId]=useState(initialClient||clients[0].id),client=clients.find(c=>c.id===clientId)||clients[0],stores=useRef(new Map());
  if(!stores.current.has(client.id))stores.current.set(client.id,new WorkspaceStore(client));
