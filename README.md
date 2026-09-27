@@ -34,13 +34,16 @@ That optional `portable-vendor` directory is not committed to GitHub.
 
 ## Implemented
 
-- Two independent public synthetic clients: **Motion Rig** and **Transfer Bench**. Client switches preserve drafts within the session.
+- Three independent public synthetic clients: **Motion Rig**, **Transfer Bench** and **Signal Lab**. The third client is analytical rather than a mechanism, so the shared runtime is exercised outside the FOIL/3D-mechanics shape. Client switches preserve drafts within the session.
 - Native WebGL rendering, CPU Canvas 3D fallback and final SVG fallback; orbit, pan, zoom, camera presets, stable-id picking, visibility, ghosting and exploded presentation.
 - Shared 3D, face/profile/top SVG views, assembly, parameters, parts table and one playback timeline.
 - Five coordinated compositions: Laboratory, orthographic plans, immutable baseline/candidate comparison, **References** and display-only explanation.
 - Generic artifact/document bindings: a stable scene entity can point to figures, document regions, images, code or table references. The References workspace synchronizes document items, 3D/2D selection and optional playback phase.
 - Session-local PDF/PNG/JPEG/WebP opening for a declared document slot. Local object URLs are not persisted or exported; no private document bytes are added to the public repository.
 - Grouped parameter undo/redo, revisioned requests, stale-result rejection, validated JSON imports with review, and explicit provenance.
+- DOM-free **ReactiveGraph** for explicit local dependency DAGs, plus a cancellable/revision-aware **TaskCoordinator** for bounded async work. These are client-owned primitives, not a global script-rerun engine.
+- Inert `datapass.studio.app/1` manifest with a matching Python authoring helper; it declares parameters/views/tasks/artifact bindings but never serializes callbacks or formulas.
+- Privacy-bounded `datapass.studio.trace/1` session trace. Studio records semantic interaction/task/export events without parameter values or document bytes, and exports it only on user action.
 - Source-mode IndexedDB storage with optimistic transaction conflict detection and latest-snapshot saves. Offline HTML intentionally uses memory.
 - Local workspace JSON, 3D PNG, vector SVG, static HTML report and evidence JSON exports. Evidence can carry inert artifact/document ids, page/source classification and bound entity ids, never the session-local document URL.
 - Optional private FOIL adapter: **12 parts, nine R0 cases, 34 fields**. The original verified Python kernel remains the authority for its conditional model calculations.
@@ -60,7 +63,7 @@ The separate delivered private workspace is already installed and built; see its
 ## Reusable source boundaries
 
 ```text
-packages/runtime       contracts, store, playback, validation, persistence, renderer + artifact registries
+packages/runtime       contracts, store, playback, reactive DAG, task/trace coordination, validation + registries
 packages/scene         transforms, primitives, picking, projected linework
 packages/renderers     WebGL / CPU Canvas and SVG chart geometry
 packages/react         reusable React view surfaces, including the artifact/document workspace
@@ -68,7 +71,7 @@ apps/studio            one reference workbench composition
 clients                independent public domains
 python/datapass_app     trusted local evaluators and optional private connector
 integrations           donor contracts, optional adapters, source integrity pins
-examples               minimal client, Python evaluator, Next.js host sketch
+examples               minimal client, reactive/task flow, Python authoring/evaluator, Next.js host sketch
 ```
 
 These are source entry points, not published npm packages. Next.js is not a core dependency. The example Next.js host is a sketch, not a qualified build.
@@ -89,8 +92,8 @@ python tests/browser/durability.py --url http://127.0.0.1:8765
 
 Executed local evidence: **59 Node tests, 37 Python tests, 18 public and 18 private browser flows, five real HTTP/API checks**, nine original-kernel comparisons and 153 prescribed-pose comparisons. The first hosted CI also passed the public HTTP-browser flow with native WebGL. Physical Windows GPU performance remains unqualified. Later commits require their own successful CI run.
 
-Read `docs/TEST_REPORT.md`, `docs/HOSTED_CI.md`, `docs/ARCHITECTURE.md`, `docs/CLIENT_SDK.md`, `docs/FOIL_CLIENT.md` and `docs/NEXT_PASS.md`. A workflow file alone is not a passing test result.
+Read `docs/TEST_REPORT.md`, `docs/HOSTED_CI.md`, `docs/ARCHITECTURE.md`, `docs/REACTIVE_RUNTIME.md`, `docs/CLIENT_SDK.md`, `docs/FOIL_CLIENT.md` and `docs/NEXT_PASS.md`. A workflow file alone is not a passing test result.
 
 ## Deliberate limits
 
-No Streamlit-compatible API, Jupyter kernel, generic reactive scheduler, arbitrary Python execution, draggable layout editor, CAD solid operations or manufacturing drawings. The document/reference pane is implemented, but there is **no PDF extraction/OCR, automatic figure detection or inferred bounding-box pipeline yet**. Canvas painter ordering and projected mesh linework are approximations. No multi-user authentication, cloud persistence, collaboration, public deployment or automatic publication is supplied by this pass.
+No Streamlit-compatible API, Jupyter kernel, arbitrary Python execution, draggable layout editor, CAD solid operations or manufacturing drawings. The new reactive graph is an explicit client-owned DAG; it does not execute expressions from documents or emulate a whole-script rerun model. The document/reference pane is implemented, but there is **no PDF extraction/OCR, automatic figure detection or inferred bounding-box pipeline yet**. Canvas painter ordering and projected mesh linework are approximations. No multi-user authentication, cloud persistence, collaboration, public deployment or automatic publication is supplied by this pass.
