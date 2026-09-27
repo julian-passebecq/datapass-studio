@@ -2,8 +2,13 @@
 import {box,cylinder,identity,translate,multiply,rotateZ} from '../packages/scene/index.js';
 const defaults={length:7,width:1.8,height:1.4,lift:1.3,frequency:.25};
 const params=[['length','Longueur','m',3,12,.1],['width','Largeur','m',1,4,.1],['height','Hauteur','m',.5,3,.1],['lift','Levage','m',0,3,.1],['frequency','Frequence','Hz',.1,1,.05]].map(([id,label,unit,min,max,step])=>({id,label,unit,min,max,step,group:'Configuration',affects:['geometry','pose']}));
+const artifactCatalog={documents:[{id:'bench-note',title:'Dossier de manutention synthetique',mime:'application/pdf',sourceKind:'synthetic',pages:3,sourceLabel:'Fixture publique · document structure sans source industrielle'}],artifacts:[
+ {id:'bench-carriage',title:'Course du chariot',kind:'figure',documentId:'bench-note',page:2,entityIds:['carriage','payload'],phase:.25,region:[.09,.23,.80,.30],preview:{plane:'side'},sourceKind:'synthetic',summary:'Repere lie au chariot et a sa charge fictive.'},
+ {id:'bench-rails',title:'Implantation des rails',kind:'document-region',documentId:'bench-note',page:3,entityIds:['rail--1','rail-1','bed'],region:[.14,.20,.72,.43],preview:{plane:'top'},sourceKind:'synthetic',summary:'Association documentaire independante du domaine Motion Rig.'}
+]};
 const cache=new WeakMap();
 export const transferBench={id:'transfer-bench',version:'1.0.0',title:'Transfer Bench',description:'Second client, m\u00eame socle',classification:'synthetic',parameters:params,defaults,
+ artifactCatalog,
  period:p=>1/p.frequency,
  scenarios:[{id:'standard',label:'Standard',parameters:defaults}],validate:()=>[],
  frame(p,phase,view){let parts=cache.get(p);if(!parts){parts=[];const add=(id,label,pos,color,parameterIds,moving=false)=>parts.push({id,label,positions:pos,color,parameterIds,moving,group:moving?'Chariot':'Banc',source:'synthetic'});
