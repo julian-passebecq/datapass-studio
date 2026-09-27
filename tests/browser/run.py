@@ -131,6 +131,12 @@ def main():
         def export_workspace():
             payload=export_payload('Espace de travail JSON');d=json.loads(payload['text']);assert_true(d['parameters'][field]==changed);assert_true(d['provenance']['reviewed'] is False);assert_true(d['clientId']==client)
         check('workspace export carries real current parameters and provenance',export_workspace)
+        def app_manifest():
+            payload=export_payload('Manifeste app JSON');d=json.loads(payload['text']);assert_true(d['format']=='datapass.studio.app');assert_true(d['id']==client);assert_true(d['tasks'][0]['revision_guarded'] is True);assert_true('frame' not in d and 'callback' not in payload['text'].lower())
+        check('declarative app manifest exports no executable client callbacks',app_manifest)
+        def session_trace():
+            payload=export_payload('Trace de session');d=json.loads(payload['text']);assert_true(d['format']=='datapass.studio.trace');assert_true(d['clientId']==client);assert_true(len(d['events'])>0);assert_true('parameters' not in d);assert_true(all('value' not in (e.get('meta') or {}) for e in d['events']))
+        check('session trace records interaction semantics without parameter payloads',session_trace)
         def export_svg():
             payload=export_payload('SVG profil');assert_true('<svg' in payload['text']);assert_true('Pas un plan de fabrication' in payload['text']);assert_true('<script' not in payload['text'])
         check('vector export contains actual model linework and caveat',export_svg)
@@ -156,6 +162,11 @@ def main():
             page.get_by_role('combobox',name='Client actif').select_option('transfer-bench');assert_true(page.locator('h1').inner_text()=='Transfer Bench');assert_true(page.locator('canvas[data-triangles]').count()==1)
             page.get_by_role('combobox',name='Client actif').select_option(client);assert_true(number().input_value()==str(changed))
         check('second client uses the same runtime; switching preserves draft state',client_switch)
+        def third_client():
+            page.get_by_role('combobox',name='Client actif').select_option('signal-lab');assert_true(page.locator('h1').inner_text()=='Signal Lab');assert_true(page.locator('canvas[data-triangles]').count()==1)
+            assert_true(page.locator('.metric-value').count()>=4)
+            page.get_by_role('combobox',name='Client actif').select_option(client);assert_true(page.locator('h1').inner_text()!= 'Signal Lab')
+        check('third analytical client proves the runtime is not FOIL/mechanics-specific',third_client)
         def renderer_recovery():
             if renderer!='native-webgl': return
             mode('Laboratoire 3D');canvas=page.locator('canvas[data-renderer="native-webgl"]');canvas.evaluate("c=>c.dispatchEvent(new Event('webglcontextlost',{cancelable:true}))")
