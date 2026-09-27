@@ -3,3 +3,7 @@ export * from './validation.js';
 export * from './persistence.js';
 export * from './registry.js';
 export * from './artifacts.js';
+export * from './reactive.js';
+export * from './tasks.js';
+export * from './trace.js';
+export * from './app-spec.js';
