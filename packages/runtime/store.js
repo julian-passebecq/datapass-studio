@@ -57,7 +57,7 @@ export class WorkspaceStore {
     if(Object.keys(patch).some(k=>!['mode','camera','yaw','explode','edges','ghost','grid'].includes(k)))return;
     for(const k of ['edges','ghost','grid'])if(k in patch&&typeof patch[k]!=='boolean')return;
     const v={...this.state.view,...patch};
-    if(!['lab','plans','compare','explain'].includes(v.mode)||!['iso','front','side','top'].includes(v.camera))return;
+    if(!['lab','plans','compare','references','explain'].includes(v.mode)||!['iso','front','side','top'].includes(v.camera))return;
     if(!Number.isFinite(v.yaw)||v.yaw < -180||v.yaw>180||!Number.isFinite(v.explode)||v.explode<0||v.explode>1)return;
     this.#emit({view:v},true);
   }
