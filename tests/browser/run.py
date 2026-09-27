@@ -79,6 +79,11 @@ def main():
             canvas=page.locator('canvas');xy=canvas.evaluate('(c,id)=>c.__sceneApi.screenPoint(id)',piece)
             canvas.click(position={'x':xy[0],'y':xy[1]});assert_true(page.locator('.selection-bar code').inner_text()==piece)
         check('3D ray picking selects the shared entity',select3d)
+        def direct_reference_link():
+            linked=page.locator('.selection-reference')
+            if linked.count()==0: return
+            linked.click();expect(page.locator('.reference-layout')).to_be_visible();mode('Laboratoire 3D')
+        check('selected entities can jump directly to linked references',direct_reference_link)
         def parameter_change():
             number().fill(str(changed));number().press('Enter');assert_true(number().input_value()==str(changed))
             assert_true(page.locator('.selection-bar').inner_text().endswith('001'))
