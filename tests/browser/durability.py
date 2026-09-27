@@ -23,7 +23,7 @@ def run_durability(page, context, url, check, client, field, initial, piece):
 
     def wait_saved(target, value):
         target.wait_for_function(_WAIT_FOR_VALUE, arg=[client, field, value], timeout=10000)
-        expect(target.locator('.saved')).to_contain_text('Enregistr', timeout=10000)
+        expect(target.locator('span.saved')).to_contain_text('Enregistr', timeout=10000)
 
     def reload_restores():
         page.set_viewport_size({'width':1440,'height':1050})
