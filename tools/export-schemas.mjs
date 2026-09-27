@@ -1,6 +1,6 @@
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {motionRig} from '../clients/motion-rig.js';import {transferBench} from '../clients/transfer-bench.js';
-const enumView={type:'object',required:['mode','camera','yaw','explode','edges','ghost','grid'],additionalProperties:false,properties:{mode:{enum:['lab','plans','compare','explain']},camera:{enum:['iso','front','side','top']},yaw:{type:'number',minimum:-180,maximum:180},explode:{type:'number',minimum:0,maximum:1},edges:{type:'boolean'},ghost:{type:'boolean'},grid:{type:'boolean'}}};
+const enumView={type:'object',required:['mode','camera','yaw','explode','edges','ghost','grid'],additionalProperties:false,properties:{mode:{enum:['lab','plans','compare','references','explain']},camera:{enum:['iso','front','side','top']},yaw:{type:'number',minimum:-180,maximum:180},explode:{type:'number',minimum:0,maximum:1},edges:{type:'boolean'},ghost:{type:'boolean'},grid:{type:'boolean'}}};
 await mkdir('schemas',{recursive:true});
 for(const c of [motionRig,transferBench]){
  const schema={$schema:'https://json-schema.org/draft/2020-12/schema',title:c.title+' workspace',type:'object',additionalProperties:false,
