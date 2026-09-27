@@ -3,7 +3,7 @@ import {artifactCatalog,artifactForSelection,documentForArtifact,safeDocumentTar
 import {h,useWorkspace,usePlayback,Icon,Badge,Button,Panel,PlanView} from './components.js';
 
 const sourceLabel={synthetic:'SYNTHETIQUE','private-reference':'REFERENCE PRIVEE','user-reference':'SOURCE UTILISATEUR',derived:'DERIVE'};
-const kindLabel={figure:'Figure','document-region':'Region','image:'Image',code:'Code',table:'Table'};
+const kindLabel={figure:'Figure','document-region':'Region',image:'Image',code:'Code',table:'Table'};
 
 function DocumentSurface({document,artifact}){
  const target=safeDocumentTarget(document,artifact?.page);
