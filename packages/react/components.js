@@ -69,6 +69,20 @@ export function TraceChart({store,playback}){
    ...series.map((v,i)=>h('circle',{key:v.id,cx:x,cy:plot.y(valueAt(v,t.phase)),r:4,className:'chart-dot series-'+i})),
    ...[0,.25,.5,.75,1].map(v=>h('text',{key:v,x:plot.x(v),y:146,textAnchor:'middle'},(v*100)+'%'))));
 }
+export function ComparisonTraceChart({store,playback}){
+ const s=useWorkspace(store),t=usePlayback(playback,18);
+ const baseline=useMemo(()=>store.client.traces(store.baseline,{scenarioId:s.scenarioId}).slice(0,2),[store.client,store.baseline,s.scenarioId]);
+ const candidate=useMemo(()=>store.client.traces(s.parameters,{scenarioId:s.scenarioId}).slice(0,2),[store.client,s.parameters,s.scenarioId]);
+ const series=useMemo(()=>baseline.flatMap((b,i)=>{const current=candidate.find(x=>x.id===b.id)||candidate[i];return [{...b,id:'baseline-'+b.id,label:'Reference · '+b.label},...(current?[{...current,id:'candidate-'+current.id,label:'Active · '+current.label}]:[])];}),[baseline,candidate]);
+ if(!series.length)return h('p',{className:'muted-note'},'Aucune serie comparable pour ce client.');
+ const plot=chartGeometry(series,600,180),x=plot.x(t.phase);
+ return h('div',{className:'comparison-trace'},h('div',{className:'comparison-trace-head'},h('div',null,h('span',{className:'label-small'},'COMPARAISON CINEMATIQUE'),h('strong',null,'Reference / revision active')),h('span',{className:'muted-note'},'Courbes de presentation · pas un resultat scientifique')),
+   h('div',{className:'trace-legend'},...series.map((v,i)=>h('span',{key:v.id,className:'series-'+i},h('i'),v.label))),
+   h('svg',{viewBox:'0 0 600 180',className:'trace-svg comparison-svg',role:'img','aria-label':'Comparaison des courbes de reference et de revision active'},h('title',null,'Comparaison des cinematiques prescrites a la meme phase'),
+    ...[0,.5,1].map(v=>h('line',{key:v,x1:36,x2:584,y1:plot.y(plot.min+v*(plot.max-plot.min)),y2:plot.y(plot.min+v*(plot.max-plot.min)),className:'chart-grid'})),
+    ...plot.series.map((v,i)=>h('path',{key:v.id,d:v.path,className:'chart-line comparison-line series-'+i,fill:'none'})),h('line',{x1:x,x2:x,y1:8,y2:156,className:'playhead'}),
+    ...[0,.25,.5,.75,1].map(v=>h('text',{key:v,x:plot.x(v),y:176,textAnchor:'middle'},Math.round(v*100)+'%'))));
+}
 export function Timeline({playback}){const t=usePlayback(playback,24);return h('div',{className:'timeline'},
  h(IconButton,{icon:t.playing?'pause':'play',label:t.playing?'Pause':'Lire le cycle',disabled:t.reducedMotion,onClick:()=>playback.set({playing:!t.playing})}),
  h('span',{className:'timeline-time'},(t.phase*t.period).toFixed(2)+' s'),
