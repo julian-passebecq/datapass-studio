@@ -100,6 +100,29 @@ const layoutSchema={
   ]}}
 };
 
+const chartSchema={
+  $schema:'https://json-schema.org/draft/2020-12/schema',title:'Datapass Studio chart spec',type:'object',additionalProperties:false,
+  required:['format','version','id','title','kind','x','y','series','sourceKind','note'],properties:{
+    format:{const:'datapass.studio.chart'},version:{const:1},id:{type:'string',pattern:idPattern},title:{type:'string',minLength:1,maxLength:240},
+    kind:{enum:['line','bar','scatter']},sourceKind:{enum:sourceKinds},note:{type:'string',maxLength:2000},
+    x:{$ref:'#/$defs/axis'},y:{$ref:'#/$defs/axis'},
+    series:{type:'array',minItems:1,maxItems:12,items:{type:'object',additionalProperties:false,required:['id','label','points'],properties:{
+      id:{type:'string',pattern:idPattern},label:{type:'string',minLength:1,maxLength:160},
+      points:{type:'array',minItems:1,maxItems:5000,items:{type:'array',minItems:2,maxItems:2}}
+    }}}
+  },
+  $defs:{axis:{type:'object',additionalProperties:false,required:['label','unit','type'],properties:{label:{type:'string',minLength:1,maxLength:120},unit:{type:'string',maxLength:40},type:{enum:['number','category']}}}}
+};
+const tableSchema={
+  $schema:'https://json-schema.org/draft/2020-12/schema',title:'Datapass Studio table spec',type:'object',additionalProperties:false,
+  required:['format','version','id','title','columns','rows','sourceKind','note'],properties:{
+    format:{const:'datapass.studio.table'},version:{const:1},id:{type:'string',pattern:idPattern},title:{type:'string',minLength:1,maxLength:240},
+    sourceKind:{enum:sourceKinds},note:{type:'string',maxLength:2000},
+    columns:{type:'array',minItems:1,maxItems:50,items:{type:'object',additionalProperties:false,required:['id','label','type','unit'],properties:{id:{type:'string',pattern:idPattern},label:{type:'string',minLength:1,maxLength:160},type:{enum:['string','number','boolean']},unit:{type:'string',maxLength:40}}}},
+    rows:{type:'array',maxItems:5000,items:{type:'object',additionalProperties:false,required:['id','values'],properties:{id:{type:'string',pattern:idPattern},values:{type:'object',additionalProperties:{type:['string','number','boolean','null']}}}}}
+  }
+};
+
 await mkdir('schemas',{recursive:true});
 const checking=process.argv.includes('--check');
 const canonical=v=>Array.isArray(v)?'['+v.map(canonical).join(',')+']':v&&typeof v==='object'?'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}':JSON.stringify(v);
@@ -134,4 +157,6 @@ await emit('schemas/artifact-catalog.schema.json',artifactCatalogSchema);
 await emit('schemas/app-manifest.schema.json',appSchema);
 await emit('schemas/session-trace.schema.json',traceSchema);
 await emit('schemas/layout.schema.json',layoutSchema);
-console.log('Workspace, app, trace, layout and artifact JSON Schemas: OK. Semantic/reference checks remain runtime validators.');
+await emit('schemas/chart.schema.json',chartSchema);
+await emit('schemas/table.schema.json',tableSchema);
+console.log('Workspace, app, trace, layout, data and artifact JSON Schemas: OK. Semantic/reference checks remain runtime validators.');
