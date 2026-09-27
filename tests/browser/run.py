@@ -125,6 +125,11 @@ def main():
         def evidence_binding():
             payload=export_payload('Evidence pour adaptateur');d=json.loads(payload['text']);assert_true(len(d.get('artifactBindings',[]))>=1);assert_true(d['artifactBindings'][0]['entityIds']);assert_true('url' not in json.dumps(d['artifactBindings']))
         check('evidence export carries reviewed-shape artifact linkage without document URLs',evidence_binding)
+        def analytical_data():
+            mode('Données');expect(page.locator('.data-mode')).to_be_visible();assert_true(page.locator('.studio-chart').count()==1);assert_true(page.locator('.studio-data-grid').count()==1)
+            expect(page.locator('.studio-layout-tabs')).to_be_visible();page.get_by_role('tab',name='Parametres').click();assert_true(page.locator('.studio-data-grid tbody tr').count()>=1)
+            page.get_by_role('tab',name='Metriques').click();assert_true(page.locator('.studio-data-grid tbody tr').count()>=1)
+        check('analytical mode composes portable chart/table specs through LayoutHost',analytical_data)
         def explain():
             mode('Expliquer');assert_true(page.locator('.explain-grid').count()==1);assert_true(page.locator('code').count()>0)
         check('display-only explanation mode composes scene and code',explain)
