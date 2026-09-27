@@ -18,6 +18,7 @@ Studio 0.1 is a visual-lab framework extracted through working clients, not an a
 | Python registry | Trusted bounded evaluators, server validation, authoritative calculation results | Arbitrary client code from JSON, untrusted plugin installation |
 | Artifact catalog | Inert links among client documents/figures/code/table references and stable scene entity IDs | PDF interpretation, scientific authority, arbitrary HTML or execution |
 | Layout contract / LayoutHost | Inert split/grid/tabs/stack composition plus trusted slot rendering | Domain semantics, arbitrary callbacks in JSON, drag/drop docking persistence |
+| Data specs / React views | Bounded chart/table semantics, native SVG/grid reference rendering | ConceptMotion semantics, D3 ownership, analytical computation |
 | Reference shell | Composition, control presentation, explicit review/import/export actions | A cloud runtime or CAD kernel |
 
 An entity id persists across 3D, SVG plans, the parts table and inspectors. Render meshes carry local triangle coordinates plus column-major transforms, units and source labels. Canonical documents do not serialize DOM, React nodes, GPU objects or functions.
@@ -49,6 +50,12 @@ The `datapass.studio.app/1` manifest is an inert projection used for authoring, 
 `datapass.studio.layout/1` is intentionally separate from the app manifest and workspace state. A layout names bounded recursive containers and stable slot IDs. It does not serialize React elements, domain values or executable expressions. `LayoutHost` resolves those slot IDs against a trusted consumer-owned React map.
 
 This separation lets the same runtime compose FOIL-like 3D/parameter workspaces, figure/PDF analysis, dashboard grids or code/data tabs without turning any one client layout into the framework model. The first contract supports split, grid, tabs and stack; it is not yet a persisted drag/drop docking system.
+
+## Analytical data contracts
+
+Charts and tables are serializable semantics rather than DOM/SVG serialization. `StudioChartSpec` carries line/bar/scatter series plus axis/source metadata; `StudioTableSpec` carries typed scalar columns/rows. The current React renderer is deliberately dependency-free so offline/portable builds remain possible.
+
+This is the seam for a future D3 sibling adapter. D3 would own richer analytical rendering/transitions; it would not become part of ConceptMotion core and would not own domain calculations. The same chart/table specs can also be placed into a `LayoutHost` slot beside 3D, documents or code.
 
 ## State and revisions
 
