@@ -1,5 +1,5 @@
 const ID=/^[a-z][a-zA-Z0-9_.-]{0,127}$/;
-const VIEW_KINDS=new Set(['lab','plans','compare','references','explain','custom']);
+const VIEW_KINDS=new Set(['lab','plans','compare','references','data','explain','custom']);
 const ARTIFACT_KINDS=new Set(['figure','document-region','image','code','table']);
 const CLASSIFICATIONS=new Set(['synthetic','private']);
 const SOURCE_KINDS=new Set(['synthetic','private-reference','user-reference','derived']);
@@ -38,7 +38,7 @@ export function manifestFromClient(client,{views}={}){
   if(!client||typeof client!=='object')throw new Error('Client required');
   const manifest={format:'datapass.studio.app',schemaVersion:1,id:client.id,title:client.title,version:client.version,description:client.description||'',classification:client.classification,
     parameters:(client.parameters||[]).map(p=>({id:p.id,label:p.label,default:client.defaults?.[p.id],min:p.min,max:p.max,step:p.step,unit:p.unit||'',group:p.group||'Parameters',affects:[...(p.affects||[])],note:p.note||''})),
-    views:(views||['lab','plans','compare','references','explain']).map(v=>typeof v==='string'?{id:v,label:v,kind:VIEW_KINDS.has(v)?v:'custom',icon:'panel',description:''}:v),
+    views:(views||['lab','plans','compare','references','data','explain']).map(v=>typeof v==='string'?{id:v,label:v,kind:VIEW_KINDS.has(v)?v:'custom',icon:'panel',description:''}:v),
     tasks:[{id:'evaluate',label:'Evaluate',input_nodes:(client.parameters||[]).map(p=>'parameter.'+p.id),output_nodes:['metrics'],revision_guarded:true,cancellable:true}],
     artifacts:(client.artifactCatalog?.artifacts||[]).map(a=>({id:a.id,title:a.title,kind:a.kind,entity_ids:[...(a.entityIds||[])],document_id:a.documentId??null,page:a.page??null,phase:a.phase??null,source_kind:a.sourceKind||(client.classification==='private'?'private-reference':'synthetic')}))};
   return validateAppManifest(manifest);
