@@ -1,3 +1,4 @@
+import {validateArtifactCatalog} from './artifacts.js';
 /** Bounded inert-data validation. The serialized format never contains executable expressions. */
 export const MAX_JSON_BYTES = 1024 * 1024;
 const forbidden = new Set(['__proto__', 'prototype', 'constructor']);
@@ -59,6 +60,10 @@ export function validateClient(client) {
   }
   for (const fn of ['validate','frame','metrics','traces']) if (typeof client[fn] !== 'function') throw new Error('Contrat client incomplet: '+fn);
   const errors=validateParameters(client,client.defaults); if (errors.length) throw new Error(errors.join(' '));
+  const scenarioId=client.scenarios?.[0]?.id||'default';
+  const frame=client.frame(client.defaults,0,{yaw:0,explode:0,scenarioId});
+  const entityIds=new Set((frame?.parts||[]).map(p=>p.id));
+  validateArtifactCatalog(client.artifactCatalog,entityIds);
   return client;
 }
 export function validateDocument(client, doc) {
@@ -70,7 +75,7 @@ export function validateDocument(client, doc) {
   if (typeof doc.scenarioId !== 'string' || !(client.scenarios || [{id:'default'}]).some(s=>s.id===doc.scenarioId)) throw new Error('Scenario inconnu.');
   if (!doc.view || typeof doc.view !== 'object' || Array.isArray(doc.view)) throw new Error('Vue invalide.');
   if (!Number.isFinite(doc.view.yaw) || doc.view.yaw < -180 || doc.view.yaw > 180 || !Number.isFinite(doc.view.explode) || doc.view.explode<0 || doc.view.explode>1) throw new Error('Pose de presentation invalide.');
-  if (!['lab','plans','compare','explain'].includes(doc.view.mode)) throw new Error('Mode inconnu.');
+  if (!['lab','plans','compare','references','explain'].includes(doc.view.mode)) throw new Error('Mode inconnu.');
   if (!['iso','front','side','top'].includes(doc.view.camera)) throw new Error('Camera inconnue.');
   if (typeof doc.view.edges !== 'boolean' || typeof doc.view.ghost !== 'boolean' || typeof doc.view.grid !== 'boolean') throw new Error('Options de vue invalides.');
   if (!Array.isArray(doc.hidden) || doc.hidden.length > 500 || doc.hidden.some(x=>typeof x!=='string')) throw new Error('Visibilite invalide.');
