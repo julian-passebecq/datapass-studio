@@ -1,4 +1,7 @@
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
+export interface ArtifactDocument {id:string; title:string; mime:'application/pdf'|'image/png'|'image/jpeg'|'image/webp'|'text/plain'|'text/markdown'; sourceKind:'synthetic'|'private-reference'|'user-reference'|'derived'; url?:string; pages?:number; sourceLabel?:string;}
+export interface ArtifactReference {id:string; title:string; kind:'figure'|'document-region'|'image'|'code'|'table'; entityIds:string[]; documentId?:string; page?:number; summary?:string; sourceKind?:'synthetic'|'private-reference'|'user-reference'|'derived'; phase?:number; region?:[number,number,number,number]; preview?:{plane:'front'|'side'|'top'};}
+export interface ArtifactCatalog {documents:ArtifactDocument[]; artifacts:ArtifactReference[];}
 export interface ParameterSpec {
   id: string; label: string; unit: string; min: number; max: number; step: number;
   group: string; affects: string[]; note?: string;
@@ -20,6 +23,7 @@ export interface ClientDefinition {
   traces(parameters: Record<string,number>, context?: {scenarioId?: string}): {id: string; label: string; unit: string; values: number[]}[];
   metrics(parameters: Record<string,number>, context?: {scenarioId?: string}): Metric[];
   explain?: {title: string; body: string; entityId?: string; phase: number; code?: string}[];
+  artifactCatalog?: ArtifactCatalog;
 }
 export interface EvaluationRequest {
   version: 1; requestId: string; clientId: string; scenarioId: string;
