@@ -50,3 +50,10 @@ export interface SessionTraceEvent {
 export interface SessionTraceDocument {format:'datapass.studio.trace';version:1;clientId:string;clientVersion:string;startedAt:number|null;exportedAt:number;events:SessionTraceEvent[];}
 export interface ReactiveNodeInfo {id:string;kind:'source'|'computed';deps:string[];revision:number;dirty:boolean;meta:Record<string,Json>;}
 export interface TaskRun<T=Json> {runId:string;taskId:string;key:string;inputRevision:number;status:'running'|'progress'|'ready'|'stale'|'superseded'|'cancelled'|'error';progress:number;message:string;value?:T;}
+export type StudioLayoutNode =
+  | {id:string;kind:'slot';slot:string;label?:string;minSize?:number}
+  | {id:string;kind:'split';axis:'horizontal'|'vertical';ratio:number;first:StudioLayoutNode;second:StudioLayoutNode;resizable:boolean}
+  | {id:string;kind:'grid';columns:number;gap:number;children:StudioLayoutNode[]}
+  | {id:string;kind:'tabs';defaultTab:string;tabs:{id:string;label:string;child:StudioLayoutNode}[]}
+  | {id:string;kind:'stack';direction:'horizontal'|'vertical';gap:number;children:StudioLayoutNode[]};
+export interface StudioLayoutDocument {format:'datapass.studio.layout';version:1;id:string;title:string;root:StudioLayoutNode;}
