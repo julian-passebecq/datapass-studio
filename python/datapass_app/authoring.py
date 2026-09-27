@@ -7,6 +7,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field, asdict
 from typing import Any, Literal
 import json
+import math
 import re
 
 _ID = re.compile(r"^[a-z][a-zA-Z0-9_.-]{0,127}$")
@@ -35,11 +36,14 @@ class NumberParameter:
     note: str = ""
     def __post_init__(self) -> None:
         _id(self.id, "parameter id"); _text(self.label, "parameter label", 200)
-        if isinstance(self.default, bool) or not all(isinstance(x, (int, float)) for x in (self.default, self.minimum, self.maximum, self.step)):
-            raise ValueError("parameter values must be numbers")
+        values=(self.default,self.minimum,self.maximum,self.step)
+        if isinstance(self.default, bool) or not all(isinstance(x,(int,float)) and not isinstance(x,bool) and math.isfinite(float(x)) for x in values):
+            raise ValueError("parameter values must be finite numbers")
         if self.minimum > self.maximum or self.step <= 0 or not self.minimum <= self.default <= self.maximum:
             raise ValueError("invalid parameter bounds")
-        if len(self.affects) > 16 or any(not isinstance(x, str) or not x for x in self.affects):
+        if not isinstance(self.unit,str) or len(self.unit)>80 or not isinstance(self.group,str) or len(self.group)>160 or not isinstance(self.note,str) or len(self.note)>4000:
+            raise ValueError("invalid parameter metadata")
+        if len(self.affects)>16 or len(set(self.affects))!=len(self.affects) or any(not isinstance(x,str) or not x or len(x)>120 for x in self.affects):
             raise ValueError("invalid affects list")
     def json(self) -> dict[str, Any]:
         return {"id":self.id,"label":self.label,"default":self.default,"min":self.minimum,"max":self.maximum,"step":self.step,"unit":self.unit,"group":self.group,"affects":list(self.affects),"note":self.note}
@@ -54,6 +58,7 @@ class ViewSpec:
     def __post_init__(self) -> None:
         _id(self.id,"view id"); _text(self.label,"view label",120)
         if self.kind not in {"lab","plans","compare","references","explain","custom"}: raise ValueError("invalid view kind")
+        if not isinstance(self.icon,str) or len(self.icon)>120 or not isinstance(self.description,str) or len(self.description)>4000: raise ValueError("invalid view metadata")
 
 @dataclass(frozen=True)
 class TaskSpec:
@@ -65,6 +70,8 @@ class TaskSpec:
     cancellable: bool = True
     def __post_init__(self) -> None:
         _id(self.id,"task id"); _text(self.label,"task label",160)
+        if not isinstance(self.revision_guarded,bool) or not isinstance(self.cancellable,bool): raise ValueError("invalid task policy")
+        if len(self.input_nodes)>200 or len(self.output_nodes)>200 or len(set(self.input_nodes))!=len(self.input_nodes) or len(set(self.output_nodes))!=len(self.output_nodes): raise ValueError("invalid task nodes")
         for node in (*self.input_nodes,*self.output_nodes): _id(node,"node id")
 
 @dataclass(frozen=True)
@@ -83,7 +90,7 @@ class ArtifactBinding:
         for entity in self.entity_ids: _id(entity,"entity id")
         if self.document_id is not None: _id(self.document_id,"document id")
         if self.page is not None and (not isinstance(self.page,int) or self.page<1 or self.page>100000): raise ValueError("invalid page")
-        if self.phase is not None and not 0<=self.phase<=1: raise ValueError("invalid phase")
+        if self.phase is not None and (isinstance(self.phase,bool) or not isinstance(self.phase,(int,float)) or not math.isfinite(float(self.phase)) or not 0<=self.phase<=1): raise ValueError("invalid phase")
         if self.source_kind not in {"synthetic","private-reference","user-reference","derived"}: raise ValueError("invalid source kind")
 
 @dataclass
@@ -99,6 +106,8 @@ class StudioApp:
     artifacts: list[ArtifactBinding] = field(default_factory=list)
     def __post_init__(self) -> None:
         _id(self.id,"app id"); _text(self.title,"app title",200)
+        _text(self.version,"app version",100)
+        if not isinstance(self.description,str) or len(self.description)>4000: raise ValueError("invalid description")
         if self.classification not in {"synthetic","private"}: raise ValueError("invalid classification")
     def parameter(self,spec:NumberParameter)->"StudioApp": self._append_unique(self.parameters,spec,"parameter"); return self
     def view(self,spec:ViewSpec)->"StudioApp": self._append_unique(self.views,spec,"view"); return self
