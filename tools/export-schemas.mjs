@@ -8,7 +8,8 @@ const viewSchema={type:'object',required:['mode','camera','yaw','explode','edges
   edges:{type:'boolean'},ghost:{type:'boolean'},grid:{type:'boolean'}
 }};
 const sourceKinds=['synthetic','private-reference','user-reference','derived'];
-const idPattern='^[a-z][a-zA-Z0-9_.-]{0,127}
+const idPattern='^[a-z][a-zA-Z0-9_.-]{0,127}$';
+const artifactIdPattern='^[a-z][a-z0-9_.-]{1,79}$';
 const artifactCatalogSchema={$schema:'https://json-schema.org/draft/2020-12/schema',title:'Datapass Studio artifact catalog',type:'object',additionalProperties:false,properties:{
   documents:{type:'array',maxItems:100,items:{type:'object',additionalProperties:false,required:['id','title','mime','sourceKind'],properties:{
     id:{type:'string',pattern:artifactIdPattern},title:{type:'string',minLength:1,maxLength:300},mime:{enum:['application/pdf','image/png','image/jpeg','image/webp','text/plain','text/markdown']},sourceKind:{enum:sourceKinds},url:{type:'string',maxLength:2048},pages:{type:'integer',minimum:1,maximum:10000},sourceLabel:{type:'string',maxLength:1000}
