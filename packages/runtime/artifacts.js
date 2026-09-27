@@ -8,7 +8,7 @@ function safeLocalUrl(value){
  if(typeof value!=='string'||value.length>2048)throw new Error('URL de document invalide.');
  let u;try{u=new URL(value,'https://studio.invalid/');}catch{throw new Error('URL de document invalide.');}
  if(u.origin!=='https://studio.invalid'||u.username||u.password||!['https:'].includes(u.protocol))throw new Error('Les documents integres doivent etre des ressources du meme site.');
- if(/(?:^|\/)\.\.(?:\/|$)/.test(value.replaceAll('\\\\','/')))throw new Error('Chemin parent interdit pour un document.');
+ if(/(?:^|\/)\.\.(?:\/|$)/.test(value.replaceAll('\\\\','/')))throw new Error('Chemin parent interdit pour une ressource locale.');
  return value;
 }
 export function validateArtifactCatalog(catalog,knownEntityIds=null){
