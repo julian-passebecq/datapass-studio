@@ -4,6 +4,7 @@ const cube=box(0,0,0,1,1,1),defaults={travel:3};
 export const minimalClient={
  id:'minimal-lab',title:'Minimal Lab',description:'One domain, shared workbench',version:'1.0.0',classification:'synthetic',defaults,
  parameters:[{id:'travel',label:'Travel',unit:'m',min:1,max:8,step:.1,group:'Geometry',affects:['pose']}],
+ artifactCatalog:{documents:[{id:'lab-note',title:'Local lab note',mime:'application/pdf',sourceKind:'user-reference'}],artifacts:[{id:'payload-figure',title:'Payload figure',kind:'figure',documentId:'lab-note',page:1,entityIds:['payload'],phase:.25,preview:{plane:'side'},sourceKind:'user-reference',summary:'Optional binding between one stable scene entity and a user-authorized document region.'}]},
  scenarios:[{id:'standard',label:'Standard',parameters:defaults}],period:()=>3,validate:()=>[],
  frame:(p,phase)=>({units:'m',source:'SYNTHETIC_MESH_NOT_CAD',warnings:['Illustrative only'],parts:[{
   id:'payload',label:'Payload',group:'Assembly',positions:cube,matrix:translate(p.travel*Math.sin(phase*2*Math.PI),0,1),
