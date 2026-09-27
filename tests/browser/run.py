@@ -60,7 +60,10 @@ def main():
                 fn();report['tests'].append({'name':name,'status':'passed','seconds':round(time.monotonic()-start,3)});print('PASS',name,flush=True)
             except Exception as e:
                 report['tests'].append({'name':name,'status':'failed','error':str(e)[:2000]});print('FAIL',name,str(e)[:1200],flush=True)
-                page.screenshot(path=str(qa/'screenshots'/f'{prefix}-failure-{len(report["tests"])}.png'))
+                try:
+                    page.screenshot(path=str(qa/'screenshots'/f'{prefix}-failure-{len(report["tests"])}.png'),timeout=3000)
+                except Exception as screenshot_error:
+                    report.setdefault('diagnostics',[]).append({'kind':'failure-screenshot','error':str(screenshot_error)[:500]})
                 dialog=page.get_by_role('dialog')
                 if dialog.count(): dialog.get_by_role('button',name='Fermer',exact=True).click()
         def dismiss_error():
