@@ -8,7 +8,7 @@ const fmt=v=>typeof v==='number'?new Intl.NumberFormat('fr-FR',{maximumFractionD
 export function ChartView({spec,height=280}){
  const chart=useMemo(()=>validateChartSpec(spec),[spec]);
  const width=720,pad={l:58,r:22,t:32,b:48},innerW=width-pad.l-pad.r,innerH=height-pad.t-pad.b;
- const yExtent=extent(chart.series.flatMap(s=>s.points.map(p=>p[1]).filter(v=>v!==null))),ys=v=>pad.t+innerH-(v-yExtent[0])/(yExtent[1]-yExtent[0])*innerH;
+ const yValues=chart.series.flatMap(s=>s.points.map(p=>p[1]).filter(v=>v!==null));if(chart.kind==='bar')yValues.push(0);const yExtent=extent(yValues),ys=v=>pad.t+innerH-(v-yExtent[0])/(yExtent[1]-yExtent[0])*innerH;
  let categories=[],xExtent=[0,1],xs;
  if(chart.x.type==='category'){categories=[...new Set(chart.series.flatMap(s=>s.points.map(p=>p[0])))];xs=x=>pad.l+(categories.indexOf(x)+.5)/Math.max(1,categories.length)*innerW;}
  else{xExtent=extent(chart.series.flatMap(s=>s.points.map(p=>p[0])));xs=x=>pad.l+(x-xExtent[0])/(xExtent[1]-xExtent[0])*innerW;}
@@ -36,5 +36,5 @@ export function DataGrid({spec,maxHeight=420}){
  const rows=useMemo(()=>{if(!sort.id)return table.rows;const col=table.columns.find(x=>x.id===sort.id);if(!col)return table.rows;return [...table.rows].sort((a,b)=>{const av=a.values[col.id],bv=b.values[col.id];if(av==null&&bv==null)return 0;if(av==null)return 1;if(bv==null)return -1;return (typeof av==='number'?av-bv:String(av).localeCompare(String(bv)))*sort.direction;});},[table,sort]);
  function toggle(id){setSort(s=>s.id===id?{id,direction:-s.direction}:{id,direction:1});}
  return h('section',{className:'studio-data-grid'},h('header',null,h('div',null,h('strong',null,table.title),table.note&&h('span',null,table.note)),h(Badge,{tone:table.sourceKind},table.sourceKind)),
-  h('div',{className:'studio-data-scroll',style:{maxHeight}},h('table',null,h('thead',null,h('tr',null,...table.columns.map(c=>h('th',{key:c.id,scope:'col'},h('button',{type:'button',onClick:()=>toggle(c.id),'aria-sort':sort.id===c.id?(sort.direction>0?'ascending':'descending'):'none'},c.label,c.unit&&h('small',null,c.unit),sort.id===c.id&&h('span',{className:'sort-mark','aria-hidden':true},sort.direction>0?' ↑':' ↓')))))),h('tbody',null,...rows.map(row=>h('tr',{key:row.id,'data-row-id':row.id},...table.columns.map(c=>h('td',{key:c.id,className:c.type==='number'?'numeric':''},fmt(row.values[c.id]??null))))))));
+  h('div',{className:'studio-data-scroll',style:{maxHeight}},h('table',null,h('thead',null,h('tr',null,...table.columns.map(c=>h('th',{key:c.id,scope:'col','aria-sort':sort.id===c.id?(sort.direction>0?'ascending':'descending'):'none'},h('button',{type:'button',onClick:()=>toggle(c.id)},c.label,c.unit&&h('small',null,c.unit),sort.id===c.id&&h('span',{className:'sort-mark','aria-hidden':true},sort.direction>0?' ↑':' ↓')))))),h('tbody',null,...rows.map(row=>h('tr',{key:row.id,'data-row-id':row.id},...table.columns.map(c=>h('td',{key:c.id,className:c.type==='number'?'numeric':''},fmt(row.values[c.id]??null))))))));
 }
