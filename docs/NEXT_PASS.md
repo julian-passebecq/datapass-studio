@@ -2,7 +2,7 @@
 
 ## First: qualify what exists
 
-Run the normal npm build, commit the genuine resolved lock, run the production HTTP browser flow and verify IndexedDB persistence, reload, two-tab conflict and quota/recovery in a real origin. Run GPU WebGL and the optional Three adapter on Windows/Chrome, including resize, repeated mode switches, context loss and snapshot export. Confirm every source/candidate badge and scientific caveat survives export.
+The first clean npm build and HTTP/WebGL browser flow passed in hosted CI, and its genuine lock is committed. Check the latest follow-up CI for explicit IndexedDB reload/two-tab conflict tests. Extend these with quota/recovery and target-machine qualification. Run GPU WebGL and the optional Three adapter on Windows/Chrome, including resize, repeated mode switches, context loss and snapshot export. Confirm every source/candidate badge and scientific caveat survives export.
 
 Do not confuse the executed opaque-origin CPU browser checks with these pending checks. Keep current regression tests; do not weaken them just to replace a renderer.
 

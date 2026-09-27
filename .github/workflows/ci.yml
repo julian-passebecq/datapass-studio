@@ -18,9 +18,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Resolve dependencies (commit the reviewed lock, then use npm ci)
-        run: |
-          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - name: Install the reviewed dependency lock
+        run: npm ci
       - run: npm test
       - run: npm run check
       - run: npm run build
@@ -30,12 +29,13 @@ jobs:
       - run: python -m playwright install --with-deps chromium
       - name: Isolated portable UI gate
         run: python tests/browser/run.py --html dist/studio-offline.html
-      - name: Production HTTP integration gate (not qualified in the delivery container)
+      - name: Production HTTP integration and IndexedDB durability gate
         run: |
           python tools/serve.py --directory dist --port 8765 > qa/server.log 2>&1 &
           python -c "import time,urllib.request; time.sleep(3); assert urllib.request.urlopen('http://127.0.0.1:8765/api/health').status==200"
           python tools/smoke_http.py > qa/http-api-report.json
           python tests/browser/run.py --url http://127.0.0.1:8765
+          python tests/browser/durability.py --url http://127.0.0.1:8765
       - name: Preserve public QA and resolved lock
         if: always()
         uses: actions/upload-artifact@v4
@@ -44,6 +44,7 @@ jobs:
           path: |
             qa/browser-report.json
             qa/http-api-report.json
+            qa/durability-report.json
             qa/screenshots/public-*.png
             qa/server.log
             package-lock.json

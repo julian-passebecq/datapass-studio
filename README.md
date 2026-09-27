@@ -1,91 +1,79 @@
 # Datapass Studio
 
-A local-first, React-based **interactive visual lab framework**. A client owns its domain, geometry and evaluator; Studio supplies coordinated views, state, playback, guarded edits, exports and an optional Python bridge.
+A local-first React **interactive visual lab framework**. Clients own their domain, geometry and evaluator. Studio supplies coordinated views, state, playback, guarded edits, exports and an optional Python bridge.
 
-**Version 0.1.0 — foundation / reference-client pass, 2026-09-27.** This is not a universal Python UI replacement, a CAD kernel, or an application generator for every kind of dashboard. It is an implemented vertical slice with explicit boundaries.
+**0.1.0 - foundation / reference-client pass, 2026-09-27.** This is an implemented vertical slice, not a universal Python UI replacement or a CAD kernel.
 
-## Try the delivery
+## Try the delivered build
 
-The separately supplied portable ZIP contains `studio-offline.html`. Open that file in a modern browser: it contains the actual React application and its runtime, without a CDN or installation. This mode is **an in-memory session**; export the workspace JSON before closing. It does not run Python.
+The portable ZIP includes `studio-offline.html`: open it in a modern browser without a CDN or installation. This mode is an **in-memory session**; export workspace JSON before closing. It does not run Python.
 
-The separately supplied **private FOIL workspace** adds the user's authorized reference files and nine cases. Do not publish that ZIP, its offline HTML, or its generated `public/private-client` directory.
+The separate private FOIL workspace includes the user's authorized reference files and nine cases. Its offline HTML and generated data are private: do not publish that package.
 
-## Run from this repository
+## Run from source
 
-Node 22.12+ and Python 3.12+ are the development targets. The local delivery was tested using Node 22.16 and Python 3.13. A clean online npm/pip installation was not executable in the delivery environment.
+Node 22.12+ and Python 3.12+ are the development targets.
 
 ```sh
-npm install
+npm ci
 npm run build
 python -m pip install -r requirements.txt
 python tools/serve.py --directory dist --port 8765
 ```
 
-Open `http://127.0.0.1:8765`. The server binds to loopback only. It provides the browser app and a same-origin, explicitly requested Python evaluator. There is no arbitrary code, notebook, shell or SQL execution endpoint.
+Open `http://127.0.0.1:8765`. The loopback server serves the browser app and an explicitly requested Python evaluator. There is no arbitrary code, notebook, shell or SQL execution endpoint.
 
-After reviewing and committing the generated `package-lock.json`, use `npm ci`. **No fabricated dependency lock is included.** The CI workflow resolves dependencies when the lock is absent and preserves the resolved lock for review; this is a known reproducibility gap until that lock is committed.
-
-The source delivery ZIP also includes a verified `portable-vendor` runtime from the user's earlier artifact, with its licenses and byte hashes. That optional directory is not committed in this repository:
+The genuine `package-lock.json` was produced by the successful first GitHub Actions run, inspected and committed. See `docs/HOSTED_CI.md` for the exact source/run identities. The local portable ZIP additionally carries a hash-verified real React runtime from the user's earlier archive, with its licenses:
 
 ```sh
 node tools/build.mjs --portable
 node tools/standalone.mjs
 ```
 
-## What works
+That optional `portable-vendor` directory is not committed to GitHub.
 
-- Two independent public synthetic clients: **Motion Rig** and **Transfer Bench**. Switching clients preserves their draft state within the app session.
-- A native WebGL renderer, a CPU Canvas 3D fallback, and a final SVG projection fallback. Orbit, pan, zoom, camera presets, stable-id picking, visibility, ghosting and exploded presentation use the same scene contract.
-- Synchronized 3D, face/profile/top SVG views, part table, parameter inspector and one playback timeline. Viewpoint-dependent silhouettes keep round members visible in drawings.
-- Four reference layouts: laboratory, orthographic plans, baseline/candidate comparison and display-only explanations with code excerpts.
-- Grouped parameter undo/redo, immutable reference configurations, bounded/import-reviewed JSON, parameter validation, independent playback state and stale-result rejection.
-- Source-mode IndexedDB persistence with optimistic transaction conflict detection, a latest-snapshot save queue and visible failure handling. Offline HTML deliberately uses memory, not a fictitious durable save.
-- Workspace JSON, 3D PNG, vector SVG projections, a standalone static HTML report, and a provenance-bearing evidence JSON. Exports are local/user-triggered.
-- Optional Python registry: handlers are registered by trusted source code, not by uploaded documents. Requests are bounded, typed, correlated to a client/revision and limited to declared parameters.
-- An optional **private FOIL adapter** using the supplied v0.3 package's original reference/kernel. It is installed explicitly; public builds never include its data.
+## Implemented
 
-## FOIL is a client, not the framework
+- Two independent public synthetic clients: **Motion Rig** and **Transfer Bench**. Client switches preserve drafts within the session.
+- Native WebGL rendering, CPU Canvas 3D fallback and final SVG fallback; orbit, pan, zoom, camera presets, stable-id picking, visibility, ghosting and exploded presentation.
+- Shared 3D, face/profile/top SVG views, assembly, parameters, parts table and one playback timeline.
+- Laboratory, orthographic plans, immutable baseline/candidate comparison and display-only explanation layouts.
+- Grouped parameter undo/redo, revisioned requests, stale-result rejection, validated JSON imports with review, and explicit provenance.
+- Source-mode IndexedDB storage with optimistic transaction conflict detection and latest-snapshot saves. Offline HTML intentionally uses memory.
+- Local workspace JSON, 3D PNG, vector SVG, static HTML report and evidence JSON exports.
+- Optional private FOIL adapter: **12 parts, nine R0 cases, 34 fields**. The original verified Python kernel remains the authority for its conditional model calculations.
 
-The reusable packages do not import FOIL, its cases or its scientific model. The private integration owns its 34 fields, 12 parts, nine cases, reference-mesh selection and presentation kinematics. Its LCOE/energy/power computation calls the original verified Python kernel. The browser does not implement a new scientific LCOE model.
+## FOIL stays a client
 
-The original reference and wrapper hashes are checked before import. An unchanged geometry can display the reference BRep tessellation. An edited geometry is a **parametric mesh preview, not regenerated STEP/BRep**. Neither is a fabrication approval. Prescribed motion is not an aerodynamic, structural or control-system validation. L0 outputs remain conditional screening figures, not experimentally validated wind results.
-
-Install the authorized, pinned v0.3 archive supplied with the conversation:
+No reusable package imports FOIL. Private cases, scientific kernel, meshes and generated private frontend are excluded from GitHub. The installer checks original archive/wrapper/reference hashes before importing Python and refuses silent overwrite.
 
 ```sh
 python tools/install_foil.py "path/to/foil-streamlit-wind-3d-lcoe_v0.3.0.zip"
 node tools/build.mjs --private
-node tools/standalone.mjs
 python tools/serve.py --directory dist --private-foil
 ```
 
-Use `--portable --private` for the build when using the supplied portable runtime. The installer rejects a different ZIP hash and refuses to overwrite an existing installation. See `docs/FOIL_CLIENT.md`.
+The separate delivered private workspace is already installed and built; see its French start guide. Unchanged geometry may use the original reference BRep tessellation. Edited geometry is a **parametric mesh preview, not regenerated STEP/BRep**. Prescribed motion and matching software results do not validate aerodynamic, structural or economic assumptions. Reference files are not rewritten.
 
-## Code map
+## Reusable source boundaries
 
 ```text
-packages/runtime       data contracts, store, playback, validation, persistence, registry
-packages/scene         transforms, mesh primitives, picking, feature/silhouette linework
-packages/renderers     WebGL / CPU Canvas, renderer registry, SVG chart geometry
+packages/runtime       contracts, store, playback, validation, persistence, registry
+packages/scene         transforms, primitives, picking, projected linework
+packages/renderers     WebGL / CPU Canvas and SVG chart geometry
 packages/react         reusable React view surfaces
-apps/studio            one reference workbench composition and design language
-clients                independent public domains and trusted registrations
-python/datapass_app    typed local evaluator registry and optional private connector
-tools                  build, standalone packaging, server, schema generation, checks
-integrations           pinned donor review and optional adapters
-examples               minimal domain, Python evaluator, Next.js host sketch
-tests                   Node, Python and browser checks
+apps/studio            one reference workbench composition
+clients                independent public domains
+python/datapass_app     trusted local evaluators and optional private connector
+integrations           donor contracts, optional adapters, source integrity pins
+examples               minimal client, Python evaluator, Next.js host sketch
 ```
 
-Public entry surfaces are source modules, not published npm packages. Next.js, Vite, a VS Code webview or another React host can compose them. Next.js is not a runtime dependency. See `docs/CLIENT_SDK.md` and `docs/ARCHITECTURE.md`.
+These are source entry points, not published npm packages. Next.js is not a core dependency. The example Next.js host is a sketch, not a qualified build.
 
-## Relationship to existing projects
+**DiagramCloud remains separate.** Studio evidence is not automatically accepted by its importer. The existing ConceptMotion/Fluent platform was reviewed and pinned, not cloned. Current shell controls and charts are original native/SVG code, **not Fluent or D3**. The ConceptMotion seam and optional Three.js adapter are not wired/qualified as production integrations. Read `docs/UPSTREAM_INTEGRATION.md` before extending them.
 
-**DiagramCloud stays a separate explainer/publication product.** Its `Project` schema is not repurposed as a scientific app model. Studio evidence is not automatically compatible with its importer; a reviewed mapping is still required. No DiagramCloud repository or schema was modified.
-
-The existing ConceptMotion/Fluent platform is pinned in `integrations/upstream.lock.json`. Its external consumer contract was reviewed. The portable app does **not** bundle or claim the official Fluent UI controls, the ConceptMotion player, Monaco or a D3 analytical SDK. The current UI controls and SVG charts are original. `conceptmotion-host.js` is an integration seam, and `three-adapter.js` is an optional unqualified Three.js implementation. Neither is represented as tested production integration. See `docs/UPSTREAM_INTEGRATION.md` before expanding these.
-
-## Verify
+## Verification and continuation
 
 ```sh
 npm test
@@ -93,19 +81,14 @@ npm run check
 python -m pip install -r requirements-test.txt
 python -m pytest tests/python -q
 python -m playwright install chromium
-python tools/smoke_http.py --url http://127.0.0.1:8765
 python tests/browser/run.py --url http://127.0.0.1:8765
+python tests/browser/durability.py --url http://127.0.0.1:8765
 ```
 
-For the isolated portable UI check:
+Executed local evidence: **59 Node tests, 37 Python tests, 18 public and 18 private browser flows, five real HTTP/API checks**, nine original-kernel comparisons and 153 prescribed-pose comparisons. The first hosted CI also passed the public HTTP-browser flow with native WebGL. Physical Windows GPU performance remains unqualified. Later commits require their own successful CI run.
 
-```sh
-node tools/standalone.mjs
-python tests/browser/run.py --html dist/studio-offline.html
-```
-
-The browser runner accepts `--executable /path/to/chromium`. Private checks run only when the authorized reference is installed. `docs/TEST_REPORT.md` distinguishes executed local evidence from pending HTTP, GPU and hosted CI qualification.
+Read `docs/TEST_REPORT.md`, `docs/HOSTED_CI.md`, `docs/ARCHITECTURE.md`, `docs/CLIENT_SDK.md`, `docs/FOIL_CLIENT.md` and `docs/NEXT_PASS.md`. A workflow file alone is not a passing test result.
 
 ## Deliberate limits
 
-This pass does not implement a Jupyter kernel, Streamlit API compatibility, arbitrary Python cell execution, a generic dependency DAG scheduler, a full pane/layout editor, a PDF extraction workspace, CAD solid operations or manufacturing drawings. The Canvas fallback uses approximate painter ordering. The SVG exporter is mesh linework, not a complete CAD hidden-line engine. There is no multi-user authentication, cloud persistence, collaboration, public deployment or automatic publication.
+No Streamlit-compatible API, Jupyter kernel, generic reactive scheduler, arbitrary Python execution, PDF extraction workspace, draggable layout editor, CAD solid operations or manufacturing drawings. Canvas painter ordering and projected mesh linework are approximations. No multi-user authentication, cloud persistence, collaboration, public deployment or automatic publication is supplied by this pass.

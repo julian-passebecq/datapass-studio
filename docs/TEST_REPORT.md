@@ -1,6 +1,6 @@
 # Executed evidence and qualification limits
 
-Date: 2026-09-27. Commands were run in the delivery container; hosted CI is separate.
+Date: 2026-09-27. This table records the local checks. The successful hosted public HTTP/WebGL run is recorded separately in `HOSTED_CI.md`; do not confuse its graphics backend with physical Windows GPU qualification.
 
 | Check | Executed result |
 |---|---|
@@ -29,11 +29,11 @@ Export intent is instrumented to retain the actual generated Blob/data payload r
 
 ## Not yet qualified
 
-- Live production HTTP browser navigation, deployed URL behavior and native IndexedDB/CAS interactions in a non-opaque browser origin.
-- GPU WebGL rendering, actual Three.js integration, graphics-driver performance or a 60fps guarantee.
-- Clean networked npm/pip dependency installation, a committed npm lock, or hosted GitHub Actions status.
+- Public internet deployment and target Windows browser behavior. The initial hosted CI did pass production HTTP navigation; follow-up tests explicitly check IndexedDB reload and two-tab CAS (consult the exact latest Actions run).
+- Physical GPU/driver performance, actual Three.js integration or a 60fps guarantee. Native WebGL passed in hosted Chromium using the requested software graphics backend.
+- Private-source hosted testing: private files are deliberately absent from GitHub. The public npm/pip installation passed and the genuine generated npm lock is now committed.
 - Actual upstream Fluent/ConceptMotion integration, D3 implementation or Next.js host build.
 - Operating-system downloads, desktop PowerPoint/PDF export or complete accessibility certification.
 - Physical/aerodynamic/structural/financial validity of FOIL assumptions. Numerical software conformance does not establish those claims.
 
-The CI workflow includes the production HTTP gate. Its existence is not proof that it ran or passed. Inspect the exact commit's Actions result before merging or calling the release production-ready.
+The first hosted run completed successfully; see `HOSTED_CI.md` for its exact commit, run and artifact identities. Later changes need their own successful run. A green workflow is not a claim of scientific validity, physical GPU performance or a production security audit.
