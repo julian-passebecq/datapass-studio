@@ -2,7 +2,7 @@
 
 ## Scope
 
-Studio 0.1 is a visual-lab framework extracted through working clients, not an attempted rewrite of all the user's apps. The app root provides four deliberate compositions. The library boundary is React plus portable data/renderer contracts, not Next.js or the FOIL domain.
+Studio 0.1 is a visual-lab framework extracted through working clients, not an attempted rewrite of all the user's apps. The app root now provides five deliberate compositions: 3D lab, orthographic plans, comparison, document/artifact references and explanation. The library boundary is React plus portable data/artifact/renderer contracts, not Next.js or the FOIL domain.
 
 ## Ownership
 
@@ -13,15 +13,26 @@ Studio 0.1 is a visual-lab framework extracted through working clients, not an a
 | PlaybackStore | Phase, speed, period, reduced-motion policy | Persistent document revision or Python calls |
 | Renderer adapter | Mount/update/destroy, draw resources, picking, viewport camera, capture | Domain computation, durable storage |
 | Python registry | Trusted bounded evaluators, server validation, authoritative calculation results | Arbitrary client code from JSON, untrusted plugin installation |
+| Artifact catalog | Inert links among client documents/figures/code/table references and stable scene entity IDs | PDF interpretation, scientific authority, arbitrary HTML or execution |
 | Reference shell | Composition, control presentation, explicit review/import/export actions | A cloud runtime or CAD kernel |
 
 An entity id persists across 3D, SVG plans, the parts table and inspectors. Render meshes carry local triangle coordinates plus column-major transforms, units and source labels. Canonical documents do not serialize DOM, React nodes, GPU objects or functions.
+
+## Artifact and document model
+
+The scene contract answers **what is being visualized**. The artifact catalog answers **what source or explanatory object is linked to that stable entity**. These are deliberately separate. A scene part may exist without a document; a PDF figure may reference one or several scene entities; neither owns the other.
+
+`packages/runtime/artifacts.js` stays DOM-free. It validates bounded serializable metadata for documents and artifact references, stable ids, source classification, pages, normalized regions, optional playback phases and optional orthographic preview planes. Static URLs must be same-site. The React reference workspace may additionally attach a user-selected PDF/image by browser object URL for the current session only. That URL is UI state: it is revoked on replacement/unmount, is not written to IndexedDB, and is not emitted by evidence export.
+
+This is intentionally not a PDF extraction engine. There is no OCR, automatic figure detection, coordinate inference or trust promotion. A region is useful only when a client/user workflow knows the coordinate convention. A future extractor can produce reviewed artifact patches without changing scene identity or the runtime format.
+
+Evidence export may include an `artifactBindings` projection containing artifact/document ids, page, source kind and linked entity ids. It never includes session object URLs. DiagramCloud still needs an explicit reviewed adapter; Studio does not write DiagramCloud documents directly.
 
 ## State and revisions
 
 Input revision increments for parameter/scenario changes and imports. Selection, visibility and camera presentation do not invalidate a scientific result, because they do not change its input values. Persisted storage has an independent CAS token; document `revision` must not be mistaken for the complete storage generation.
 
-A grouped slider gesture creates one history entry. Playback creates none. A comparison uses a cloned scenario baseline and candidate parameters, a shared phase, and a presentation-camera channel. It never writes edits into the reference.
+A grouped slider gesture creates one history entry. Playback creates none. A comparison uses a cloned scenario baseline and candidate parameters, a shared phase, a presentation-camera channel and shared trace coordinates. It never writes edits into the reference. The comparison chart is currently Studio SVG geometry, not D3; the chart semantics are kept separate so a future D3 adapter can replace rendering without moving domain logic into ConceptMotion.
 
 A request carries `requestId`, `clientId`, `scenarioId`, `inputRevision` and the parameter map. The store checks response shape, correlation, latest request identity and current input revision/values. The network coordinator aborts superseded requests and also ignores a late rejection from an older task. Source-backed metrics in a private client are unavailable after editing until a matching Python result arrives.
 
@@ -37,6 +48,7 @@ The standalone offline HTML is explicitly a memory session, with JSON export for
 - `studio.canvas3d`: original CPU projection used when WebGL is unavailable. The same geometry, transforms, picking and controls; approximate painter ordering. This is the renderer actually exercised in browser tests.
 - SVG plan fallback: face/profile/top mesh projection. Feature edges plus viewpoint silhouettes, stable entity ids and an explicit non-manufacturing caveat.
 - Optional Three adapter: external dependency, not a second scientific model. Not qualified by this pass and not the default.
+- Renderer loss: a WebGL/context failure exposes the existing SVG/plan fallback and a retry action. Workspace parameters and history stay outside renderer lifecycle.
 
 Geometric framing samples eight cycle phases for a stable viewport. That is **not** a swept-volume or collision proof. Drawing dimensions currently label projected/envelope extents, not certified part manufacturing dimensions. Exported SVG intentionally says mesh projection.
 
