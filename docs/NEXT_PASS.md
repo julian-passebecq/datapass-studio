@@ -23,4 +23,5 @@ Do not restart Mosaic, AtlasNote, DiagramCloud or every portfolio app in this re
 - Run the full hosted gate after the ReactiveGraph/TaskCoordinator/SessionTrace/Signal Lab changes; focused local unit tests are not a substitute for the complete browser suite.
 - Exercise Signal Lab through 3D, plans, references, import/export and mobile in the browser gate so client-independence remains a tested property.
 - Decide whether the inert app manifest becomes the canonical scaffold input or remains an export/review format. Do not make it executable JSON.
+- Qualify `datapass.studio.layout/1` in one real split figure/PDF/data/code consumer before adding drag/drop docking. Preserve slot identity and keep layout separate from domain data.
 - Add the first genuine sibling D3 renderer only when there is a concrete comparison/dashboard use case; keep ConceptMotion semantic explanation separate.
