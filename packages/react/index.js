@@ -3,3 +3,5 @@ export {SceneViewport,PlanView,TraceChart,ComparisonTraceChart,Timeline,Panel,Pa
 export {ArtifactWorkspace} from './artifact-workspace.js';
 export {LayoutHost} from './LayoutHost.js';
 export {ChartView,DataGrid} from './DataViews.js';
+export {FlowView} from './FlowView.js';
+export {CodeView} from './CodeView.js';

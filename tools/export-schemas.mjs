@@ -123,6 +123,267 @@ const tableSchema={
   }
 };
 
+const flowSchema={
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Datapass Studio flow spec",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "version",
+    "id",
+    "title",
+    "orientation",
+    "nodes",
+    "edges",
+    "sourceKind",
+    "note"
+  ],
+  "properties": {
+    "format": {
+      "const": "datapass.studio.flow"
+    },
+    "version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-zA-Z0-9_.-]{0,127}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240
+    },
+    "orientation": {
+      "enum": [
+        "horizontal",
+        "vertical"
+      ]
+    },
+    "sourceKind": {
+      "enum": [
+        "synthetic",
+        "private-reference",
+        "user-reference",
+        "derived"
+      ]
+    },
+    "note": {
+      "type": "string",
+      "maxLength": 3000
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 200,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "kind",
+          "group",
+          "detail",
+          "entityIds",
+          "meta"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-zA-Z0-9_.-]{0,127}$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "kind": {
+            "enum": [
+              "source",
+              "transform",
+              "store",
+              "model",
+              "report",
+              "service",
+              "task",
+              "decision",
+              "note"
+            ]
+          },
+          "group": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "detail": {
+            "type": "string",
+            "maxLength": 3000
+          },
+          "entityIds": {
+            "type": "array",
+            "maxItems": 50,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-zA-Z0-9_.-]{0,127}$"
+            }
+          },
+          "meta": {
+            "type": "object",
+            "maxProperties": 24,
+            "additionalProperties": {
+              "type": [
+                "string",
+                "number",
+                "boolean",
+                "null"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "from",
+          "to",
+          "kind",
+          "label"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-zA-Z0-9_.-]{0,127}$"
+          },
+          "from": {
+            "type": "string",
+            "pattern": "^[a-z][a-zA-Z0-9_.-]{0,127}$"
+          },
+          "to": {
+            "type": "string",
+            "pattern": "^[a-z][a-zA-Z0-9_.-]{0,127}$"
+          },
+          "kind": {
+            "enum": [
+              "data",
+              "control",
+              "reference",
+              "dependency"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 160
+          }
+        }
+      }
+    }
+  }
+};
+const codeSchema={
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Datapass Studio code spec",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "version",
+    "id",
+    "title",
+    "language",
+    "fileLabel",
+    "code",
+    "sourceKind",
+    "note",
+    "highlights"
+  ],
+  "properties": {
+    "format": {
+      "const": "datapass.studio.code"
+    },
+    "version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-zA-Z0-9_.-]{0,127}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240
+    },
+    "language": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "fileLabel": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "code": {
+      "type": "string",
+      "maxLength": 200000
+    },
+    "sourceKind": {
+      "enum": [
+        "synthetic",
+        "private-reference",
+        "user-reference",
+        "derived"
+      ]
+    },
+    "note": {
+      "type": "string",
+      "maxLength": 3000
+    },
+    "highlights": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "start",
+          "end",
+          "label",
+          "kind"
+        ],
+        "properties": {
+          "start": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "end": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "kind": {
+            "enum": [
+              "focus",
+              "info",
+              "warning",
+              "success"
+            ]
+          }
+        }
+      }
+    }
+  }
+};
+
 await mkdir('schemas',{recursive:true});
 const checking=process.argv.includes('--check');
 const canonical=v=>Array.isArray(v)?'['+v.map(canonical).join(',')+']':v&&typeof v==='object'?'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}':JSON.stringify(v);
@@ -159,4 +420,6 @@ await emit('schemas/session-trace.schema.json',traceSchema);
 await emit('schemas/layout.schema.json',layoutSchema);
 await emit('schemas/chart.schema.json',chartSchema);
 await emit('schemas/table.schema.json',tableSchema);
-console.log('Workspace, app, trace, layout, data and artifact JSON Schemas: OK. Semantic/reference checks remain runtime validators.');
+await emit('schemas/flow.schema.json',flowSchema);
+await emit('schemas/code.schema.json',codeSchema);
+console.log('Workspace, app, trace, layout, data, flow, code and artifact JSON Schemas: OK. Semantic/reference checks remain runtime validators.');

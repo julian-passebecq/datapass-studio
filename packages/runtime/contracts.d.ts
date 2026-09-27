@@ -69,3 +69,8 @@ export interface StudioTableSpec {
   rows:{id:string;values:Record<string,string|number|boolean|null>}[];
   sourceKind:'synthetic'|'private-reference'|'user-reference'|'derived';note:string;
 }
+export interface StudioFlowNode {id:string;label:string;kind:'source'|'transform'|'store'|'model'|'report'|'service'|'task'|'decision'|'note';group:string;detail:string;entityIds:string[];meta:Record<string,string|number|boolean|null>;}
+export interface StudioFlowEdge {id:string;from:string;to:string;kind:'data'|'control'|'reference'|'dependency';label:string;}
+export interface StudioFlowSpec {format:'datapass.studio.flow';version:1;id:string;title:string;orientation:'horizontal'|'vertical';nodes:StudioFlowNode[];edges:StudioFlowEdge[];sourceKind:'synthetic'|'private-reference'|'user-reference'|'derived';note:string;}
+export interface StudioCodeHighlight {start:number;end:number;label:string;kind:'focus'|'info'|'warning'|'success';}
+export interface StudioCodeSpec {format:'datapass.studio.code';version:1;id:string;title:string;language:string;fileLabel:string;code:string;sourceKind:'synthetic'|'private-reference'|'user-reference'|'derived';note:string;highlights:StudioCodeHighlight[];}

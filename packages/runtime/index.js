@@ -9,3 +9,5 @@ export * from './trace.js';
 export * from './app-spec.js';
 export * from './layout.js';
 export * from './data-spec.js';
+export * from './flow-spec.js';
+export * from './code-spec.js';
