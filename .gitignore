@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.private/
+public/private-client/
+portable-vendor/
+qa/screenshots/
+qa/*.log
+qa/private-*
+__pycache__/
+.pytest_cache/
+.venv/
+.env
+*.local
+
+dist-private/
+.release/
+*.bundle

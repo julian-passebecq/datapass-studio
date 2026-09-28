@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Transfer Bench workspace",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "version",
+    "clientId",
+    "clientVersion",
+    "scenarioId",
+    "parameters",
+    "revision",
+    "selection",
+    "hidden",
+    "view",
+    "provenance"
+  ],
+  "properties": {
+    "format": {
+      "const": "datapass.studio.workspace"
+    },
+    "version": {
+      "const": 1
+    },
+    "clientId": {
+      "const": "transfer-bench"
+    },
+    "clientVersion": {
+      "const": "1.0.0"
+    },
+    "scenarioId": {
+      "enum": [
+        "standard"
+      ]
+    },
+    "parameters": {
+      "type": "object",
+      "required": [
+        "length",
+        "width",
+        "height",
+        "lift",
+        "frequency"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "length": {
+          "type": "number",
+          "minimum": 3,
+          "maximum": 12
+        },
+        "width": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 4
+        },
+        "height": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 3
+        },
+        "lift": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "frequency": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 1
+        }
+      }
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "selection": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "hidden": {
+      "type": "array",
+      "maxItems": 500,
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "view": {
+      "type": "object",
+      "required": [
+        "mode",
+        "camera",
+        "yaw",
+        "explode",
+        "edges",
+        "ghost",
+        "grid"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "lab",
+            "plans",
+            "compare",
+            "references",
+            "data",
+            "explain"
+          ]
+        },
+        "camera": {
+          "enum": [
+            "iso",
+            "front",
+            "side",
+            "top"
+          ]
+        },
+        "yaw": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "explode": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "edges": {
+          "type": "boolean"
+        },
+        "ghost": {
+          "type": "boolean"
+        },
+        "grid": {
+          "type": "boolean"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": [
+        "classification",
+        "source",
+        "reviewed"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "classification": {
+          "const": "synthetic"
+        },
+        "source": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "reviewed": {
+          "const": false
+        }
+      }
+    }
+  }
+}

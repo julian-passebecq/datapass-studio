@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Datapass Studio code spec",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "version",
+    "id",
+    "title",
+    "language",
+    "fileLabel",
+    "code",
+    "sourceKind",
+    "note",
+    "highlights"
+  ],
+  "properties": {
+    "format": {
+      "const": "datapass.studio.code"
+    },
+    "version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-zA-Z0-9_.-]{0,127}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240
+    },
+    "language": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "fileLabel": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "code": {
+      "type": "string",
+      "maxLength": 200000
+    },
+    "sourceKind": {
+      "enum": [
+        "synthetic",
+        "private-reference",
+        "user-reference",
+        "derived"
+      ]
+    },
+    "note": {
+      "type": "string",
+      "maxLength": 3000
+    },
+    "highlights": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "start",
+          "end",
+          "label",
+          "kind"
+        ],
+        "properties": {
+          "start": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "end": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "kind": {
+            "enum": [
+              "focus",
+              "info",
+              "warning",
+              "success"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

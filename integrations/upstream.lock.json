@@ -1,0 +1,18 @@
+{
+  "format": "datapass.studio.upstream-review",
+  "version": 1,
+  "visualPlatform": {
+    "repository": "julian-passebecq/react_ms_fluent_2_framework",
+    "commit": "30e69639bfc3929c348fd8f9c6c38a2cb61984d8",
+    "workspace": "project/conceptmotion_studio",
+    "contract": "docs/EXTERNAL_CONSUMERS.md",
+    "status": "contract-reviewed-not-installed",
+    "packages": ["@datapass/figure", "@datapass/ui", "@datapass/code", "@datapass/content", "@conceptmotion/core"]
+  },
+  "diagramcloud": {
+    "repository": "julian-passebecq/diagramcloud",
+    "reviewedGitHubCommit": "4829223814b40b4b10c1b83619b6cae24b4e6607",
+    "status": "separate-product-no-schema-migration-no-live-sync",
+    "gitlabLatest": "not-established-by-this-pass"
+  }
+}

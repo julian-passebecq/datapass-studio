@@ -1,0 +1,104 @@
+{
+  "mode": "isolated-offline-dom",
+  "private": false,
+  "tests": [
+    {
+      "name": "real 3D renderer draws a nonempty mesh",
+      "status": "passed",
+      "seconds": 0.002
+    },
+    {
+      "name": "3D ray picking selects the shared entity",
+      "status": "passed",
+      "seconds": 0.057
+    },
+    {
+      "name": "parameter edit updates geometry and invalidates private cached metrics",
+      "status": "passed",
+      "seconds": 0.064
+    },
+    {
+      "name": "undo and redo restore parameter snapshots",
+      "status": "passed",
+      "seconds": 0.143
+    },
+    {
+      "name": "orbit changes only the presentation camera",
+      "status": "passed",
+      "seconds": 0.24
+    },
+    {
+      "name": "three 2D views share selection and cycle phase",
+      "status": "passed",
+      "seconds": 0.517
+    },
+    {
+      "name": "2D entity selection is keyboard accessible",
+      "status": "passed",
+      "seconds": 0.033
+    },
+    {
+      "name": "comparison shares camera motion but preserves separate parameter sets",
+      "status": "passed",
+      "seconds": 0.618
+    },
+    {
+      "name": "display-only explanation mode composes scene and code",
+      "status": "passed",
+      "seconds": 0.357
+    },
+    {
+      "name": "workspace export carries real current parameters and provenance",
+      "status": "passed",
+      "seconds": 0.162
+    },
+    {
+      "name": "vector export contains actual model linework and caveat",
+      "status": "passed",
+      "seconds": 0.188
+    },
+    {
+      "name": "invalid import is refused without crashing or clearing the model",
+      "status": "passed",
+      "seconds": 0.142
+    },
+    {
+      "name": "valid import requires review before application",
+      "status": "passed",
+      "seconds": 0.35
+    },
+    {
+      "name": "Python execution boundary is explicit for this host",
+      "status": "passed",
+      "seconds": 0.143
+    },
+    {
+      "name": "second client uses the same runtime; switching preserves draft state",
+      "status": "passed",
+      "seconds": 0.476
+    },
+    {
+      "name": "reduced motion stops autoplay but allows manual seeking",
+      "status": "passed",
+      "seconds": 0.059
+    },
+    {
+      "name": "390px layout has no horizontal page overflow",
+      "status": "passed",
+      "seconds": 0.517
+    },
+    {
+      "name": "no browser JavaScript errors during completed flows",
+      "status": "passed",
+      "seconds": 0.0
+    }
+  ],
+  "limitations": [
+    "Opaque-origin DOM: IndexedDB unavailable; memory session explicitly used.",
+    "Export payload generation checked; no OS-download or live HTTP claim.",
+    "GPU WebGL unavailable in this environment; renderer recorded below."
+  ],
+  "renderer": "canvas3d-cpu",
+  "passed": 18,
+  "failed": 0
+}
