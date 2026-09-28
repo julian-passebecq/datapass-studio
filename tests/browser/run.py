@@ -95,8 +95,8 @@ def main():
                 assert_true(page.locator('.metric-value').first.inner_text().startswith('\u2014'))
         check('parameter edit updates geometry and invalidates private cached metrics',parameter_change)
         def undo_redo():
-            page.get_by_role('button',name='Annuler',exact=True).click();assert_true(number().input_value()==str(initial))
-            page.get_by_role('button',name='Retablir',exact=True).click();assert_true(number().input_value()==str(changed))
+            page.get_by_role('button',name='Annuler',exact=True).click();expect(number()).to_have_value(str(initial),timeout=3000)
+            page.get_by_role('button',name='Retablir',exact=True).click();expect(number()).to_have_value(str(changed),timeout=3000)
         check('undo and redo restore parameter snapshots',undo_redo)
         def orbit():
             c=page.locator('canvas');before=c.evaluate('(c,id)=>c.__sceneApi.screenPoint(id)',piece);r=c.bounding_box();page.mouse.move(r['x']+r['width']/2,r['y']+r['height']/2);page.mouse.down();page.mouse.move(r['x']+r['width']/2+70,r['y']+r['height']/2+12,steps=8);page.mouse.up();after=c.evaluate('(c,id)=>c.__sceneApi.screenPoint(id)',piece);assert_true(abs(before[0]-after[0])>2)
