@@ -112,13 +112,16 @@ function Workspace({client,allClients,onClientChange,workspaceStore}){
  function applyReviewedImport(){
   if(!importPreview)return;
   const reviewed=importPreview,inputRevision=store.getSnapshot().revision;
-  // Close the review dialog in the click task itself. Applying the document can
-  // trigger an expensive scene refresh, so defer that work to the next task.
-  setImportPreview(null);
-  setTimeout(()=>{
-   try{store.importDocument(reviewed);trace.record('import','reviewed-apply',{inputRevision});}
-   catch(error){store.setError('Import valide mais non applicable: '+String(error?.message||error));}
-  },0);
+  // Buttons are explicitly type=button, so applying synchronously cannot trigger
+  // an accidental form/navigation wait. Apply before closing so HTTP/IndexedDB
+  // mode observes the imported state deterministically.
+  try{
+   store.importDocument(reviewed);
+   trace.record('import','reviewed-apply',{inputRevision});
+   setImportPreview(null);
+  }catch(error){
+   store.setError('Import valide mais non applicable: '+String(error?.message||error));
+  }
  }
  async function importFile(e){try{const file=e.target.files?.[0];if(!file)return;if(file.size>1024*1024)throw new Error('Document limite a 1 Mio.');const doc=boundedJson(await file.text());validateDocument(client,doc);setImportPreview(doc);}catch(err){store.setError(err.message);}finally{e.target.value='';}}
  const metrics=s.evaluationStatus==='ready'&&s.evaluation?.metrics?s.evaluation.metrics:client.metrics(s.parameters,{scenarioId:s.scenarioId});
